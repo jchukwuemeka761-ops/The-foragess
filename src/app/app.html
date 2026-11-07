@@ -1,0 +1,381 @@
+<div class="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col selection:bg-amber-500 selection:text-neutral-950">
+  
+  <!-- Top Utility Bar -->
+  <div class="bg-neutral-900 border-b border-neutral-800 text-[11px] text-neutral-300 py-1.5 px-4 hidden sm:block">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <span class="flex items-center gap-1.5">
+          <mat-icon class="!w-3.5 !h-3.5 !text-xs text-amber-400">schedule</mat-icon>
+          <span>Open 24 Hours · Every Day</span>
+        </span>
+        <span class="flex items-center gap-1.5">
+          <mat-icon class="!w-3.5 !h-3.5 !text-xs text-amber-400">place</mat-icon>
+          <span>Okwuta Road by Ahiaeke Junction, Umuahia, Abia State</span>
+        </span>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <a [href]="'tel:' + site.phoneRaw" class="hover:text-amber-300 transition-colors flex items-center gap-1">
+          <mat-icon class="!w-3.5 !h-3.5 !text-xs text-amber-400">call</mat-icon>
+          <span>{{ site.phoneDisplay }}</span>
+        </a>
+        <a [href]="site.whatsappUrl" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-400 transition-colors flex items-center gap-1">
+          <mat-icon class="!w-3.5 !h-3.5 !text-xs text-emerald-400">chat</mat-icon>
+          <span>WhatsApp 24/7</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header class="sticky top-0 z-40 bg-neutral-950/95 backdrop-blur-md border-b border-amber-500/20 w-full shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20 gap-4">
+        
+        <!-- Brand Logo & Title -->
+        <button
+          type="button"
+          (click)="navigateTo('home')"
+          class="flex items-center gap-3 shrink-0 text-left cursor-pointer group focus:outline-none"
+        >
+          <div class="w-11 h-11 rounded-xl overflow-hidden bg-white/5 p-1 border border-amber-500/30 flex items-center justify-center shrink-0 shadow-inner group-hover:border-amber-400 transition-colors">
+            <img
+              [src]="site.logoSrc"
+              alt="Naveda World Logo"
+              class="w-full h-full object-contain filter drop-shadow"
+              referrerpolicy="no-referrer"
+            />
+          </div>
+          <div class="flex flex-col leading-tight">
+            <div class="flex items-center gap-1.5">
+              <span class="font-display font-black tracking-wider text-lg sm:text-xl text-white">NAVEDA</span>
+              <span class="font-display font-light text-amber-400 text-lg sm:text-xl">WORLD</span>
+            </div>
+            <span class="text-[9.5px] uppercase font-bold tracking-[0.22em] text-amber-300/90">
+              Bites · Brews · The Arena
+            </span>
+          </div>
+        </button>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden xl:flex items-center gap-1 text-xs font-semibold text-neutral-300">
+          @for (item of navItems; track item.id) {
+            <button
+              type="button"
+              (click)="navigateTo(item.id)"
+              class="px-3.5 py-2 rounded-xl transition-all duration-200 cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
+              [class]="
+                currentPage() === item.id
+                  ? 'bg-amber-500/20 text-amber-300 font-black border border-amber-500/50 shadow-sm'
+                  : 'text-neutral-300 hover:text-amber-200 hover:bg-neutral-900 border border-transparent'
+              "
+            >
+              <span>{{ item.label }}</span>
+              @if (item.badge) {
+                <span
+                  class="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+                  [class]="
+                    currentPage() === item.id
+                      ? 'bg-amber-400 text-neutral-950 font-black'
+                      : 'bg-neutral-800 text-amber-400'
+                  "
+                >
+                  {{ item.badge }}
+                </span>
+              }
+            </button>
+          }
+        </nav>
+
+        <!-- Right Quick Actions -->
+        <div class="hidden sm:flex items-center gap-3 shrink-0">
+          <a
+            [href]="'tel:' + site.phoneRaw"
+            class="p-2.5 rounded-xl text-neutral-300 hover:text-amber-300 hover:bg-neutral-900 border border-neutral-800 transition-colors"
+            title="Call Naveda Front Desk"
+          >
+            <mat-icon class="!w-4 !h-4 !text-base leading-none text-amber-400">call</mat-icon>
+          </a>
+
+          <button
+            type="button"
+            (click)="openReservation('General Table or Pitch Slot')"
+            class="px-5 py-2.5 text-xs font-black tracking-wider uppercase text-neutral-950 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 hover:from-amber-400 hover:to-yellow-500 rounded-xl transition-all duration-200 shadow-md shadow-amber-950/50 whitespace-nowrap cursor-pointer"
+          >
+            Reserve Table / Slot
+          </button>
+        </div>
+
+        <!-- Mobile Menu Hamburger -->
+        <div class="flex xl:hidden items-center gap-2">
+          <button
+            type="button"
+            (click)="openReservation('General Table or Pitch Slot')"
+            class="sm:hidden px-3 py-1.5 text-[11px] font-black uppercase text-neutral-950 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-lg cursor-pointer"
+          >
+            Book
+          </button>
+
+          <button
+            type="button"
+            (click)="toggleMobileMenu()"
+            class="p-2 rounded-xl text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 focus:outline-none cursor-pointer"
+            aria-label="Toggle navigation menu"
+          >
+            <mat-icon class="!w-6 !h-6 !text-2xl leading-none">
+              {{ mobileMenuOpen() ? 'close' : 'menu' }}
+            </mat-icon>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Mobile Navigation Drawer -->
+      @if (mobileMenuOpen()) {
+        <div class="xl:hidden py-4 border-t border-neutral-800 space-y-1.5 animate-fade-in">
+          @for (item of navItems; track item.id) {
+            <button
+              type="button"
+              (click)="navigateTo(item.id)"
+              class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-between transition-colors cursor-pointer"
+              [class]="
+                currentPage() === item.id
+                  ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40'
+                  : 'text-neutral-300 hover:text-white hover:bg-neutral-900'
+              "
+            >
+              <span>{{ item.label }}</span>
+              @if (item.badge) {
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-800 text-amber-400">
+                  {{ item.badge }}
+                </span>
+              }
+            </button>
+          }
+
+          <div class="pt-3 flex flex-col gap-2.5">
+            <button
+              type="button"
+              (click)="openReservation('General Table or Pitch Slot'); toggleMobileMenu()"
+              class="w-full text-center px-4 py-3 text-xs font-black uppercase tracking-wider text-neutral-950 bg-gradient-to-r from-amber-500 to-yellow-600 rounded-xl shadow-md cursor-pointer"
+            >
+              Reserve Table / Pitch Slot
+            </button>
+
+            <a
+              [href]="site.whatsappUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-neutral-200 bg-neutral-900 border border-neutral-800 rounded-xl"
+            >
+              <mat-icon class="!w-4 !h-4 !text-base text-emerald-400">chat</mat-icon>
+              <span>Chat on WhatsApp (24/7)</span>
+            </a>
+          </div>
+        </div>
+      }
+    </div>
+  </header>
+
+  <!-- Atmosphere Vibrancy Quick Selector Bar -->
+  <app-atmosphere-toolbar />
+
+  <!-- Main View Router -->
+  <main class="flex-1 w-full">
+    @switch (currentPage()) {
+      @case ('sports') {
+        <app-sports-page
+          (openLightbox)="openLightbox($event)"
+          (openReservation)="openReservation($event)"
+        />
+      }
+      @case ('restaurant') {
+        <app-restaurant-page
+          (openLightbox)="openLightbox($event)"
+          (openReservation)="openReservation($event)"
+        />
+      }
+      @case ('nightlife') {
+        <app-nightlife-page
+          (openLightbox)="openLightbox($event)"
+          (openReservation)="openReservation($event)"
+        />
+      }
+      @case ('mart') {
+        <app-mart-page
+          (openLightbox)="openLightbox($event)"
+          (openReservation)="openReservation($event)"
+        />
+      }
+      @case ('about') {
+        <app-about-page
+          (openLightbox)="openLightbox($event)"
+          (openReservation)="openReservation($event)"
+        />
+      }
+      @case ('contact') {
+        <app-contact-page
+          (openLightbox)="openLightbox($event)"
+          (openReservation)="openReservation($event)"
+        />
+      }
+      @default {
+        <app-home-page
+          (openLightbox)="openLightbox($event)"
+          (openReservation)="openReservation($event)"
+          (navigate)="navigateTo($any($event))"
+        />
+      }
+    }
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="bg-neutral-950 border-t border-amber-500/20 text-neutral-400 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-12">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        
+        <!-- Brand Info -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl overflow-hidden bg-white/5 p-1 border border-amber-500/30 flex items-center justify-center">
+              <img [src]="site.logoSrc" alt="Naveda Logo" class="w-full h-full object-contain" referrerpolicy="no-referrer" />
+            </div>
+            <div>
+              <div class="font-display font-black text-white text-base">NAVEDA WORLD</div>
+              <div class="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Bites · Brews · The Arena</div>
+            </div>
+          </div>
+          <p class="text-xs text-neutral-400 leading-relaxed">
+            Eastern Nigeria's premier 24/7 recreation and dining complex in Umuahia. Fine dining, crafted cocktails, all-weather AstroTurf, billiards lounge, and live highlife band.
+          </p>
+          <div class="text-[11px] text-amber-300 font-semibold flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>Operating 24 Hours Round the Clock</span>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="space-y-3">
+          <h4 class="text-sm font-bold uppercase tracking-wider text-white font-display">Navigation</h4>
+          <ul class="space-y-2 text-xs">
+            @for (item of navItems; track item.id) {
+              <li>
+                <button
+                  type="button"
+                  (click)="navigateTo(item.id)"
+                  class="hover:text-amber-300 transition-colors cursor-pointer text-left flex items-center gap-1.5"
+                >
+                  <mat-icon class="!w-3.5 !h-3.5 !text-xs text-amber-500/70">chevron_right</mat-icon>
+                  <span>{{ item.label }}</span>
+                </button>
+              </li>
+            }
+          </ul>
+        </div>
+
+        <!-- Venue Sections -->
+        <div class="space-y-3">
+          <h4 class="text-sm font-bold uppercase tracking-wider text-white font-display">Features & Spaces</h4>
+          <ul class="space-y-2 text-xs">
+            <li>
+              <button type="button" (click)="navigateTo('sports')" class="hover:text-amber-300 transition-colors cursor-pointer text-left">
+                5-A-Side AstroTurf Pitch
+              </button>
+            </li>
+            <li>
+              <button type="button" (click)="navigateTo('sports')" class="hover:text-amber-300 transition-colors cursor-pointer text-left">
+                The Champions Billiards Lounge
+              </button>
+            </li>
+            <li>
+              <button type="button" (click)="navigateTo('restaurant')" class="hover:text-amber-300 transition-colors cursor-pointer text-left">
+                Eastern Nigerian Native Dishes (Nkwobi & Soups)
+              </button>
+            </li>
+            <li>
+              <button type="button" (click)="navigateTo('nightlife')" class="hover:text-amber-300 transition-colors cursor-pointer text-left">
+                Weekend Live Highlife Band (Fri - Sun)
+              </button>
+            </li>
+            <li>
+              <button type="button" (click)="navigateTo('mart')" class="hover:text-amber-300 transition-colors cursor-pointer text-left">
+                Cookware, Mortars & Provisions Mall
+              </button>
+            </li>
+            <li>
+              <button type="button" (click)="navigateTo('restaurant')" class="hover:text-amber-300 transition-colors cursor-pointer text-left">
+                Open-Air Garden Terrace Bar
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Location & Contact -->
+        <div class="space-y-3">
+          <h4 class="text-sm font-bold uppercase tracking-wider text-white font-display">Location & Contact</h4>
+          <div class="space-y-2 text-xs leading-relaxed">
+            <p class="text-neutral-300">{{ site.address }}</p>
+            <p class="text-amber-400 font-mono text-[11px]">Plus Code: {{ site.plusCode }}</p>
+            <p>
+              <a [href]="'tel:' + site.phoneRaw" class="text-white hover:text-amber-300 font-bold transition-colors">
+                {{ site.phoneDisplay }}
+              </a>
+            </p>
+            <div class="pt-2">
+              <a
+                [href]="site.whatsappUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs font-bold"
+              >
+                <mat-icon class="!w-4 !h-4 !text-base">chat</mat-icon>
+                <span>WhatsApp Front Desk</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Disclaimer -->
+      <div class="pt-8 border-t border-neutral-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-neutral-500">
+        <div>© 2026 Naveda World Bites And Brews. All Rights Reserved. Umuahia, Abia State.</div>
+        <div class="flex items-center gap-4">
+          <button type="button" (click)="navigateTo('contact')" class="hover:text-amber-400 transition-colors">
+            Contact & Directions
+          </button>
+          <span>·</span>
+          <button type="button" (click)="openReservation()" class="hover:text-amber-400 transition-colors">
+            Reserve Table
+          </button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating Sticky WhatsApp Dial Button -->
+  <a
+    [href]="site.whatsappUrl"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white flex items-center justify-center shadow-2xl shadow-emerald-950/80 transition-all duration-300 transform hover:scale-110 border-2 border-white/20 cursor-pointer"
+    title="Chat with Naveda Front Desk on WhatsApp"
+  >
+    <mat-icon class="!w-7 !h-7 !text-3xl leading-none">chat</mat-icon>
+  </a>
+
+  <!-- Lightbox Modal -->
+  <app-lightbox-modal
+    [isOpen]="lightboxOpen()"
+    [imageSrc]="currentLightboxImage()"
+    (modalClose)="closeLightbox()"
+  />
+
+  <!-- Reservation Modal -->
+  <app-reservation-modal
+    [isOpen]="reservationOpen()"
+    [initialTarget]="reservationInitialTarget()"
+    (modalClose)="closeReservation()"
+  />
+
+</div>
