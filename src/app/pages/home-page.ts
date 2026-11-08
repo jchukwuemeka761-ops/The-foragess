@@ -233,6 +233,41 @@ import { Atmosphere } from '../services/atmosphere';
           />
         </div>
 
+        <!-- SUBHEADING 5: OPEN-AIR TERRACE POOL & GARDEN VISTAS (TERRACE PHOTO: naveda_22) -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-widest text-cyan-400">Garden Leisure & Alfresco Chill</span>
+              <h2 class="text-2xl sm:text-4xl font-black text-white font-display mt-0.5">
+                Terrace Pool Table & Garden Breezes
+              </h2>
+            </div>
+            <button
+              type="button"
+              (click)="navigatePage('sports')"
+              class="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 cursor-pointer"
+            >
+              <span>Explore Terrace Games</span>
+              <mat-icon class="!w-4 !h-4 !text-base">arrow_forward</mat-icon>
+            </button>
+          </div>
+
+          <app-subheading-banner
+            [imageSrc]="photos.poolTerrace.imageSrc"
+            [title]="photos.poolTerrace.title"
+            [subtitle]="photos.poolTerrace.subtitle"
+            [badge]="photos.poolTerrace.badge"
+            [badgeIcon]="photos.poolTerrace.badgeIcon"
+            [location]="photos.poolTerrace.location"
+            [accent]="photos.poolTerrace.accent"
+            [highlights]="photos.poolTerrace.highlights"
+            [actionLabel]="'Book Terrace Table & Drinks'"
+            [actionType]="'pool'"
+            (openLightbox)="onPhotoLightbox($event)"
+            (openAction)="onAction($event)"
+          />
+        </div>
+
         <!-- Venue Overview Grid Cards -->
         <div class="space-y-6">
           <div class="text-center max-w-2xl mx-auto space-y-2">
