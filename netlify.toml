@@ -1,5 +1,5 @@
 [build]
-  publish = "dist/app/browser"
+  publish = "dist"
   command = "npm run build"
 
 [[redirects]]
