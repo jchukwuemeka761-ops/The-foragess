@@ -145,6 +145,15 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   → Naveda Mart & Shopping Mall
                 </button>
               </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => { onNavigate('admin'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                  className="hover:text-amber-400 transition-colors text-amber-500 font-semibold"
+                >
+                  🔒 Admin Entrance (Back End)
+                </button>
+              </li>
             </ul>
           </div>
         </div>
@@ -152,7 +161,13 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4">
           <p>© {new Date().getFullYear()} Naveda World Bites And Brews. All rights reserved. Okwuta Road by Ahiaeke Junction, Umuahia, Abia State.</p>
           <div className="flex items-center gap-4">
-            <span className="text-amber-500/80 font-medium">Ready for Netlify Static Deployment</span>
+            <button
+              type="button"
+              onClick={() => { onNavigate('admin'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              className="text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1"
+            >
+              🔒 Admin Entrance
+            </button>
             <span>•</span>
             <span className="text-neutral-400">Open 24/7</span>
           </div>

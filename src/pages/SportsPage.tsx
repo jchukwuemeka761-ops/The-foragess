@@ -1,11 +1,11 @@
 import React from 'react';
 import {
   NAVEDA_PHOTOS,
-  NAVEDA_PITCH_PACKAGES,
   NAVEDA_BILLIARDS_DETAILS,
   NAVEDA_SITE,
   SubheadingPhoto
 } from '../data/navedaData';
+import { useNavedaData } from '../context/DataContext';
 import { SubheadingBanner } from '../components/SubheadingBanner';
 import {
   Calendar,
@@ -30,6 +30,7 @@ export const SportsPage: React.FC<SportsPageProps> = ({
   onInspectPhoto,
   onOpenBooking
 }) => {
+  const { pitchPackages } = useNavedaData();
   const handlePitchBooking = (packageName: string) => {
     const text = encodeURIComponent(
       `Hello Naveda World Sports Arena, I would like to book a 5-a-side pitch session for: *${packageName}*. Please let me know available slots.`

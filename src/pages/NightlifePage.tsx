@@ -1,10 +1,10 @@
 import React from 'react';
 import {
   NAVEDA_PHOTOS,
-  NAVEDA_VIP_BOTTLES,
   NAVEDA_SITE,
   SubheadingPhoto
 } from '../data/navedaData';
+import { useNavedaData } from '../context/DataContext';
 import { SubheadingBanner } from '../components/SubheadingBanner';
 import {
   Music,
@@ -27,6 +27,7 @@ export const NightlifePage: React.FC<NightlifePageProps> = ({
   onInspectPhoto,
   onOpenBooking
 }) => {
+  const { drinks } = useNavedaData();
   const schedule = [
     {
       day: 'Every Friday Night',
@@ -162,7 +163,7 @@ export const NightlifePage: React.FC<NightlifePageProps> = ({
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 pt-8">
-            {NAVEDA_VIP_BOTTLES.map((bottle, idx) => (
+            {drinks.map((bottle, idx) => (
               <div
                 key={idx}
                 className="group relative flex flex-col justify-between rounded-2xl border border-neutral-800 bg-neutral-950 p-6 transition-all hover:border-amber-500/50"

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NAVEDA_SITE } from '../data/navedaData';
-import { Menu, X, Phone, MessageCircle, Clock, MapPin, Sparkles } from 'lucide-react';
+import { Menu, X, Phone, MessageCircle, Clock, MapPin, Sparkles, Lock } from 'lucide-react';
 
 interface NavbarProps {
   currentPage: string;
@@ -122,6 +122,20 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Book Now Button & Mobile Hamburger */}
         <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={() => handleNavClick('admin')}
+            className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition-all ${
+              currentPage === 'admin'
+                ? 'bg-amber-500 text-neutral-950 border-amber-400'
+                : 'border-neutral-800 bg-neutral-900/80 text-neutral-400 hover:text-white hover:border-amber-400/50'
+            }`}
+            title="Admin Entrance & Menu Price Manager"
+          >
+            <Lock className="h-3.5 w-3.5 text-amber-400" />
+            <span className="hidden xl:inline">Admin</span>
+          </button>
+
           <button
             type="button"
             onClick={onOpenBooking}

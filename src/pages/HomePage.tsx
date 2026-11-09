@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import {
   NAVEDA_PHOTOS,
   NAVEDA_SITE,
-  NAVEDA_MENU_ITEMS,
   SubheadingPhoto
 } from '../data/navedaData';
+import { useNavedaData } from '../context/DataContext';
 import { SubheadingBanner } from '../components/SubheadingBanner';
 import {
   Sparkles,
@@ -31,14 +31,15 @@ export const HomePage: React.FC<HomePageProps> = ({
   onInspectPhoto,
   onOpenBooking
 }) => {
+  const { dishes } = useNavedaData();
   const [activeMenuTab, setActiveMenuTab] = useState<'all' | 'native' | 'mains' | 'seafood'>('all');
 
   const heroPhoto = NAVEDA_PHOTOS.buildingExterior;
 
-  const filteredDishes = NAVEDA_MENU_ITEMS.filter((dish) => {
+  const filteredDishes = dishes.filter((dish) => {
     if (activeMenuTab === 'all') return true;
     return dish.category === activeMenuTab;
-  }).slice(0, 8); // Showcase 8 featured items with quick link to all 38 dishes
+  }).slice(0, 8); // Showcase 8 featured items with quick link to all dishes
 
   return (
     <div className="space-y-16 pb-16">

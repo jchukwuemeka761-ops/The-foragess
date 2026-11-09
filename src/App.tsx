@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { SubheadingPhoto, NAVEDA_SITE } from './data/navedaData';
+import { DataProvider } from './context/DataContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { AtmosphereToolbar } from './components/AtmosphereToolbar';
 import { LightboxModal } from './components/LightboxModal';
 import { ReservationModal } from './components/ReservationModal';
+import { AIAssistant } from './components/AIAssistant';
 import { HomePage } from './pages/HomePage';
 import { RestaurantPage } from './pages/RestaurantPage';
 import { SportsPage } from './pages/SportsPage';
@@ -12,20 +14,21 @@ import { NightlifePage } from './pages/NightlifePage';
 import { MartPage } from './pages/MartPage';
 import { AboutPage } from './pages/AboutPage';
 import { ContactPage } from './pages/ContactPage';
-import { MessageCircle, Phone, ArrowUp } from 'lucide-react';
+import { AdminPage } from './pages/AdminPage';
+import { MessageCircle, ArrowUp } from 'lucide-react';
 
-export const App: React.FC = () => {
+export const AppContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<string>('home');
   const [atmosphereClass, setAtmosphereClass] = useState<string>('atmosphere-ultra');
   const [inspectPhoto, setInspectPhoto] = useState<SubheadingPhoto | null>(null);
   const [isBookingOpen, setIsBookingOpen] = useState<boolean>(false);
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
 
-  // Sync hash routing e.g. #/restaurant
+  // Sync hash routing e.g. #/restaurant or #/admin
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#/', '').replace('#', '');
-      if (['home', 'restaurant', 'sports', 'nightlife', 'mart', 'about', 'contact'].includes(hash)) {
+      if (['home', 'restaurant', 'sports', 'nightlife', 'mart', 'about', 'contact', 'admin'].includes(hash)) {
         setCurrentPage(hash);
       }
     };
@@ -63,11 +66,13 @@ export const App: React.FC = () => {
         onOpenBooking={() => setIsBookingOpen(true)}
       />
 
-      {/* Main Visual Atmosphere Control */}
-      <AtmosphereToolbar
-        currentAtmosphere={atmosphereClass}
-        onSelect={(preset) => setAtmosphereClass(preset)}
-      />
+      {/* Main Visual Atmosphere Control - shown on consumer pages */}
+      {currentPage !== 'admin' && (
+        <AtmosphereToolbar
+          currentAtmosphere={atmosphereClass}
+          onSelect={(preset) => setAtmosphereClass(preset)}
+        />
+      )}
 
       {/* Page Content Body */}
       <main className="flex-1">
@@ -123,10 +128,17 @@ export const App: React.FC = () => {
             onInspectPhoto={(photo) => setInspectPhoto(photo)}
           />
         )}
+
+        {currentPage === 'admin' && (
+          <AdminPage onBackToSite={() => handleNavigate('home')} />
+        )}
       </main>
 
       {/* Footer */}
       <Footer onNavigate={handleNavigate} />
+
+      {/* 24/7 AI Customer Assistant Floating Concierge */}
+      <AIAssistant />
 
       {/* Lightbox Modal for 4K photo inspection */}
       <LightboxModal
@@ -171,5 +183,13 @@ export const App: React.FC = () => {
         </a>
       </div>
     </div>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <DataProvider>
+      <AppContent />
+    </DataProvider>
   );
 };

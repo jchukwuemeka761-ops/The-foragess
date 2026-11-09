@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import {
-  NAVEDA_MENU_ITEMS,
   NAVEDA_PHOTOS,
   NAVEDA_SITE,
   MenuItem,
   SubheadingPhoto
 } from '../data/navedaData';
+import { useNavedaData } from '../context/DataContext';
 import { SubheadingBanner } from '../components/SubheadingBanner';
 import {
   Search,
@@ -26,12 +26,13 @@ export const RestaurantPage: React.FC<RestaurantPageProps> = ({
   atmosphereClass,
   onInspectPhoto
 }) => {
+  const { dishes } = useNavedaData();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedSpice, setSelectedSpice] = useState<string>('all');
 
   const categories = [
-    { id: 'all', label: 'All Dishes (38)' },
+    { id: 'all', label: `All Dishes (${dishes.length})` },
     { id: 'native', label: 'Eastern Native Soups & Delicacies' },
     { id: 'mains', label: 'Pan-African Mains & Jollof' },
     { id: 'starters', label: 'Starters & Native Pepper Soups' },
@@ -40,7 +41,7 @@ export const RestaurantPage: React.FC<RestaurantPageProps> = ({
   ];
 
   const filteredDishes = useMemo(() => {
-    return NAVEDA_MENU_ITEMS.filter((dish) => {
+    return dishes.filter((dish) => {
       const matchesCategory = selectedCategory === 'all' || dish.category === selectedCategory;
       const matchesSearch =
         dish.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -50,7 +51,7 @@ export const RestaurantPage: React.FC<RestaurantPageProps> = ({
 
       return matchesCategory && matchesSearch && matchesSpice;
     });
-  }, [selectedCategory, searchQuery, selectedSpice]);
+  }, [dishes, selectedCategory, searchQuery, selectedSpice]);
 
   const handleOrderWhatsapp = (dish: MenuItem) => {
     const text = encodeURIComponent(

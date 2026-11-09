@@ -42,19 +42,22 @@ export const AtmosphereToolbar: React.FC<AtmosphereToolbarProps> = ({
   onSelect
 }) => {
   return (
-    <div className="relative z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-6 mb-8">
-      <div className="rounded-2xl border border-amber-500/30 bg-neutral-900/90 p-4 shadow-xl backdrop-blur-xl">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/20 text-amber-400">
-              <Sparkles className="h-4 w-4" />
+    <div className="relative z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-7 mb-8 sm:mt-9 sm:mb-10">
+      <div className="rounded-2xl border border-amber-500/40 bg-neutral-900/95 p-4 sm:p-5 shadow-2xl shadow-black/80 backdrop-blur-2xl ring-1 ring-white/10">
+        <div className="flex flex-col gap-3.5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/30 to-orange-500/20 text-amber-400 border border-amber-500/30 shadow-inner">
+              <Sparkles className="h-5 w-5 animate-pulse" />
             </span>
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-amber-400">
+              <p className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
                 Visual Atmosphere Engine
+                <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-300 font-semibold border border-amber-500/30">
+                  Live Filter
+                </span>
               </p>
-              <p className="text-xs text-neutral-300">
-                Choose background radiance & visibility mode
+              <p className="text-xs text-neutral-300 font-medium">
+                Choose background radiance & visibility mode across all sections
               </p>
             </div>
           </div>

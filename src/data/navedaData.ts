@@ -686,8 +686,19 @@ export const NAVEDA_MENU_ITEMS: MenuItem[] = [
   }
 ];
 
-export const NAVEDA_VIP_BOTTLES = [
+export interface DrinkItem {
+  id: string;
+  name: string;
+  category: 'Champagne' | 'Cognac' | 'Tequila' | 'Whiskey' | 'Beer' | 'Cocktails' | 'Wine' | 'Non-Alcoholic';
+  price: string;
+  badge?: string;
+  description: string;
+  image?: string;
+}
+
+export const INITIAL_DRINKS: DrinkItem[] = [
   {
+    id: 'moet-rose',
     name: 'Moët & Chandon Nectar Impérial Rosé',
     category: 'Champagne',
     price: '₦145,000',
@@ -695,6 +706,7 @@ export const NAVEDA_VIP_BOTTLES = [
     description: 'Demi-sec rosé champagne combining richness, voluptuous strawberry accents, and celebratory prestige.'
   },
   {
+    id: 'hennessy-xo',
     name: 'Hennessy X.O Extra Old Cognac',
     category: 'Cognac',
     price: '₦320,000',
@@ -702,6 +714,7 @@ export const NAVEDA_VIP_BOTTLES = [
     description: 'Deep amber with rich candied fruits, spicy wild cocoa, and velvety aged French oak notes.'
   },
   {
+    id: 'don-julio-1942',
     name: 'Don Julio 1942 Añejo Tequila',
     category: 'Tequila',
     price: '₦380,000',
@@ -709,13 +722,48 @@ export const NAVEDA_VIP_BOTTLES = [
     description: 'Handcrafted in small batches, aged for 2.5 years with warm oak, vanilla, and roasted agave complexity.'
   },
   {
+    id: 'johnnie-walker-blue',
     name: 'Johnnie Walker Blue Label',
-    category: 'Blended Scotch',
+    category: 'Whiskey',
     price: '₦290,000',
     badge: 'Rare Blend',
     description: 'Only 1 in 10,000 casks makes the blend; velvety honey, hazelnut, rose petals, and wisps of smoke.'
+  },
+  {
+    id: 'heineken-draught',
+    name: 'Heineken Cold Crisp Draught (Bottle / Bucket of 6)',
+    category: 'Beer',
+    price: '₦12,000',
+    badge: 'Sports Bar Hit',
+    description: 'Ice-chilled premium Dutch lager with 100% natural barley, crisp maltiness, and balanced bitterness.'
+  },
+  {
+    id: 'star-radler-bucket',
+    name: 'Star Radler Citrus Infusion (Bucket of 6)',
+    category: 'Beer',
+    price: '₦10,500',
+    badge: 'Refreshing',
+    description: 'Double-refreshing blend of Star lager beer and natural citrus juice, chilled to frosty perfection.'
+  },
+  {
+    id: 'naveda-signature-chapman',
+    name: 'Naveda Signature Royal Chapman Pitcher',
+    category: 'Cocktails',
+    price: '₦8,500',
+    badge: 'House Specialty',
+    description: 'Classic Nigerian mocktail/cocktail infused with Angostura bitters, Fanta, Sprite, cucumber wheels, and fresh citrus.'
+  },
+  {
+    id: 'guinness-foreign-extra',
+    name: 'Guinness Foreign Extra Stout (Chilled Platter)',
+    category: 'Beer',
+    price: '₦12,500',
+    badge: 'Rich & Bold',
+    description: 'Deep roasted barley flavor, dark creamy head, and classic robust character popular with native dishes.'
   }
 ];
+
+export const NAVEDA_VIP_BOTTLES = INITIAL_DRINKS;
 
 export const NAVEDA_MART_HIGHLIGHTS = [
   {
