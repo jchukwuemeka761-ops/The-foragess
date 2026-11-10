@@ -23,6 +23,8 @@ interface DataContextType {
   isAdmin: boolean;
   loginAdmin: (pin: string) => boolean;
   logoutAdmin: () => void;
+  changeAdminPassword: (currentPass: string, newPass: string) => { success: boolean; message: string };
+  resetAdminPassword: () => { success: boolean; message: string };
   updateDish: (id: string, updated: Partial<MenuItem>) => void;
   addDish: (newDish: MenuItem) => void;
   deleteDish: (id: string) => void;
@@ -39,7 +41,8 @@ const STORAGE_KEYS = {
   DISHES: 'naveda_admin_dishes_v1',
   DRINKS: 'naveda_admin_drinks_v1',
   PITCH: 'naveda_admin_pitch_v1',
-  ADMIN_AUTH: 'naveda_admin_session_v1'
+  ADMIN_AUTH: 'naveda_admin_session_v1',
+  ADMIN_PASSWORD: 'naveda_admin_password_v1'
 };
 
 const DEFAULT_ADMIN_PIN = 'naveda2026';
@@ -77,6 +80,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return NAVEDA_PITCH_PACKAGES as PitchPackageItem[];
   });
 
+  const [adminPassword, setAdminPassword] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.ADMIN_PASSWORD);
+      if (saved) return saved;
+    } catch {}
+    return DEFAULT_ADMIN_PIN;
+  });
+
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
     try {
       return sessionStorage.getItem(STORAGE_KEYS.ADMIN_AUTH) === 'true';
@@ -111,8 +122,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [pitchPackages]);
 
   const loginAdmin = (pin: string): boolean => {
-    // Accepts default PIN naveda2026 or 1234
-    if (pin.trim() === DEFAULT_ADMIN_PIN || pin.trim() === '1234' || pin.trim() === 'admin') {
+    const trimmed = pin.trim();
+    if (trimmed === adminPassword) {
       setIsAdmin(true);
       try {
         sessionStorage.setItem(STORAGE_KEYS.ADMIN_AUTH, 'true');
@@ -127,6 +138,33 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       sessionStorage.removeItem(STORAGE_KEYS.ADMIN_AUTH);
     } catch {}
+  };
+
+  const changeAdminPassword = (currentPass: string, newPass: string): { success: boolean; message: string } => {
+    if (currentPass.trim() !== adminPassword) {
+      return { success: false, message: 'Current password is incorrect.' };
+    }
+    if (!newPass || newPass.trim().length < 4) {
+      return { success: false, message: 'New password must be at least 4 characters long.' };
+    }
+    const cleanNewPass = newPass.trim();
+    setAdminPassword(cleanNewPass);
+    try {
+      localStorage.setItem(STORAGE_KEYS.ADMIN_PASSWORD, cleanNewPass);
+    } catch (e) {
+      console.error('Error saving new admin password', e);
+    }
+    return { success: true, message: 'Admin password updated successfully!' };
+  };
+
+  const resetAdminPassword = (): { success: boolean; message: string } => {
+    setAdminPassword(DEFAULT_ADMIN_PIN);
+    try {
+      localStorage.removeItem(STORAGE_KEYS.ADMIN_PASSWORD);
+    } catch (e) {
+      console.error('Error resetting admin password', e);
+    }
+    return { success: true, message: 'Admin password has been reset to default successfully.' };
   };
 
   const updateDish = (id: string, updated: Partial<MenuItem>) => {
@@ -209,6 +247,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAdmin,
         loginAdmin,
         logoutAdmin,
+        changeAdminPassword,
+        resetAdminPassword,
         updateDish,
         addDish,
         deleteDish,

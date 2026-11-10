@@ -22,7 +22,11 @@ import {
   Image as ImageIcon,
   Flame,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Key,
+  Eye,
+  EyeOff,
+  ShieldAlert
 } from 'lucide-react';
 
 interface AdminPageProps {
@@ -37,6 +41,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
     isAdmin,
     loginAdmin,
     logoutAdmin,
+    changeAdminPassword,
+    resetAdminPassword,
     updateDish,
     addDish,
     deleteDish,
@@ -51,10 +57,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
 
   // Login Gate state
   const [pinInput, setPinInput] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginError, setLoginError] = useState(false);
 
   // Active Admin Tab
-  const [activeTab, setActiveTab] = useState<'dishes' | 'drinks' | 'rates' | 'backup'>('dishes');
+  const [activeTab, setActiveTab] = useState<'dishes' | 'drinks' | 'rates' | 'security' | 'backup'>('dishes');
 
   // Search & filter
   const [searchQuery, setSearchQuery] = useState('');
@@ -98,6 +105,51 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // Password Management States
+  const [currentPassInput, setCurrentPassInput] = useState('');
+  const [newPassInput, setNewPassInput] = useState('');
+  const [confirmPassInput, setConfirmPassInput] = useState('');
+  const [showCurrentPass, setShowCurrentPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [securityError, setSecurityError] = useState<string | null>(null);
+  const [securitySuccess, setSecuritySuccess] = useState<string | null>(null);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+
+  const handleChangePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSecurityError(null);
+    setSecuritySuccess(null);
+
+    if (!newPassInput || newPassInput.trim().length < 4) {
+      setSecurityError('New password must be at least 4 characters long.');
+      return;
+    }
+    if (newPassInput !== confirmPassInput) {
+      setSecurityError('New passwords do not match. Please verify and re-type.');
+      return;
+    }
+
+    const res = changeAdminPassword(currentPassInput, newPassInput);
+    if (res.success) {
+      setSecuritySuccess(res.message);
+      setCurrentPassInput('');
+      setNewPassInput('');
+      setConfirmPassInput('');
+      showToast(res.message);
+    } else {
+      setSecurityError(res.message);
+    }
+  };
+
+  const handleResetPassword = () => {
+    const res = resetAdminPassword();
+    setSecuritySuccess(res.message);
+    setSecurityError(null);
+    setIsResetModalOpen(false);
+    showToast(res.message);
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -310,21 +362,31 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
             <form onSubmit={handleLogin} className="w-full space-y-4 pt-2">
               <div>
                 <label className="text-xs font-semibold text-neutral-300 block text-left mb-1">
-                  Administrator PIN / Password
+                  Administrator Password
                 </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="Enter PIN (Default: naveda2026)"
-                  value={pinInput}
-                  onChange={(e) => setPinInput(e.target.value)}
-                  className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-center text-lg font-mono text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none"
-                  autoFocus
-                />
+                <div className="relative">
+                  <input
+                    type={showLoginPassword ? 'text' : 'password'}
+                    required
+                    placeholder="Enter password"
+                    value={pinInput}
+                    onChange={(e) => setPinInput(e.target.value)}
+                    className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-4 py-3 pr-11 text-center text-lg font-mono text-white placeholder-neutral-600 focus:border-amber-500 focus:outline-none"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-neutral-400 hover:text-white transition-colors"
+                    title={showLoginPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
                 {loginError && (
                   <p className="mt-1.5 text-xs text-red-400 flex items-center justify-center gap-1 font-semibold">
                     <AlertCircle className="h-3.5 w-3.5" />
-                    Incorrect PIN. Try: naveda2026
+                    Incorrect password. Please verify and try again.
                   </p>
                 )}
               </div>
@@ -444,6 +506,19 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
         >
           <Calendar className="h-4 w-4" />
           AstroTurf Rates & Packages
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('security')}
+          className={`flex items-center gap-2 rounded-2xl px-5 py-3 text-xs font-bold transition-all ${
+            activeTab === 'security'
+              ? 'bg-amber-500 text-neutral-950 shadow-lg shadow-amber-500/20'
+              : 'bg-neutral-900 text-neutral-300 hover:bg-neutral-800 hover:text-white'
+          }`}
+        >
+          <Key className="h-4 w-4" />
+          Password & Security
         </button>
 
         <button
@@ -853,6 +928,217 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
               >
                 <RefreshCw className="h-4 w-4 text-red-400" />
                 Restore Factory Defaults
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB 5: PASSWORD & SECURITY SETTINGS */}
+      {/* ========================================================= */}
+      {activeTab === 'security' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Card 1: Change Administrator Password */}
+            <div className="rounded-3xl border border-amber-500/30 bg-neutral-900/80 p-6 sm:p-8 space-y-6 backdrop-blur-xl">
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  <Key className="h-5 w-5" />
+                </span>
+                <div>
+                  <h3 className="font-display text-lg font-bold text-white">
+                    Change Administrator Password
+                  </h3>
+                  <p className="text-xs text-neutral-400">
+                    Update the credentials used to unlock this administrative management portal.
+                  </p>
+                </div>
+              </div>
+
+              {securityError && (
+                <div className="rounded-2xl border border-red-500/40 bg-red-950/40 p-4 flex items-center gap-2.5 text-xs text-red-300 font-semibold">
+                  <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />
+                  <span>{securityError}</span>
+                </div>
+              )}
+
+              {securitySuccess && (
+                <div className="rounded-2xl border border-emerald-500/40 bg-emerald-950/40 p-4 flex items-center gap-2.5 text-xs text-emerald-300 font-semibold">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                  <span>{securitySuccess}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleChangePassword} className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-neutral-300 block mb-1">
+                    Current Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showCurrentPass ? 'text' : 'password'}
+                      required
+                      value={currentPassInput}
+                      onChange={(e) => setCurrentPassInput(e.target.value)}
+                      placeholder="Enter current password"
+                      className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-4 py-2.5 pr-11 text-xs text-white placeholder-neutral-600 focus:border-amber-500 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCurrentPass(!showCurrentPass)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white p-1"
+                      title={showCurrentPass ? 'Hide password' : 'Show password'}
+                    >
+                      {showCurrentPass ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-neutral-300 block mb-1">
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showNewPass ? 'text' : 'password'}
+                      required
+                      value={newPassInput}
+                      onChange={(e) => setNewPassInput(e.target.value)}
+                      placeholder="Enter new password (min. 4 characters)"
+                      className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-4 py-2.5 pr-11 text-xs text-white placeholder-neutral-600 focus:border-amber-500 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPass(!showNewPass)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white p-1"
+                      title={showNewPass ? 'Hide password' : 'Show password'}
+                    >
+                      {showNewPass ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-neutral-300 block mb-1">
+                    Confirm New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPass ? 'text' : 'password'}
+                      required
+                      value={confirmPassInput}
+                      onChange={(e) => setConfirmPassInput(e.target.value)}
+                      placeholder="Re-enter new password"
+                      className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-4 py-2.5 pr-11 text-xs text-white placeholder-neutral-600 focus:border-amber-500 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPass(!showConfirmPass)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white p-1"
+                      title={showConfirmPass ? 'Hide password' : 'Show password'}
+                    >
+                      {showConfirmPass ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-3 text-xs font-bold text-neutral-950 shadow-md shadow-amber-500/20 hover:from-amber-400 hover:to-orange-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <Check className="h-4 w-4" />
+                    Save New Password
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Card 2: Reset Password to System Default */}
+            <div className="flex flex-col justify-between rounded-3xl border border-neutral-800 bg-neutral-900/60 p-6 sm:p-8 space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-neutral-800 text-neutral-300 border border-white/10">
+                    <RefreshCw className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <h3 className="font-display text-lg font-bold text-white">
+                      Reset Password to System Default
+                    </h3>
+                    <p className="text-xs text-neutral-400">
+                      Restore default factory credentials anytime.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-neutral-800 bg-neutral-950/70 p-4 space-y-2 text-xs text-neutral-300">
+                  <div className="flex items-center gap-2 text-amber-400 font-bold">
+                    <ShieldCheck className="h-4 w-4" />
+                    <span>How Password Reset Operates</span>
+                  </div>
+                  <p className="text-neutral-400 leading-relaxed">
+                    Resetting will clear any custom password saved in this browser's persistent storage and revert the administrator credentials back to the standard system default.
+                  </p>
+                  <p className="text-neutral-400 leading-relaxed">
+                    All your dishes, customized prices in Naira, drinks, and pitch package configurations will remain completely safe and untouched.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-neutral-800">
+                <button
+                  type="button"
+                  onClick={() => setIsResetModalOpen(true)}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-950/40 px-5 py-3 text-xs font-bold text-red-300 hover:bg-red-900/60 transition-colors"
+                >
+                  <RefreshCw className="h-4 w-4 text-red-400" />
+                  Reset Password to Default
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MODAL: RESET PASSWORD CONFIRMATION */}
+      {/* ========================================================= */}
+      {isResetModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-md rounded-3xl border border-red-500/40 bg-neutral-900 p-6 sm:p-7 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-red-500/20 text-red-400 border border-red-500/30">
+                <ShieldAlert className="h-6 w-6" />
+              </span>
+              <div>
+                <h3 className="font-display text-lg font-bold text-white">
+                  Reset Password to Default?
+                </h3>
+                <p className="text-xs text-neutral-400">
+                  Revert credentials back to factory system default.
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-neutral-300 leading-relaxed">
+              Are you sure you want to reset the admin password? Any custom password previously configured will be cleared and the default system password will be restored.
+            </p>
+
+            <div className="pt-3 flex items-center justify-end gap-3 border-t border-neutral-800">
+              <button
+                type="button"
+                onClick={() => setIsResetModalOpen(false)}
+                className="rounded-xl bg-neutral-800 px-4 py-2 text-xs font-semibold text-neutral-300 hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleResetPassword}
+                className="rounded-xl bg-red-600 px-5 py-2 text-xs font-bold text-white hover:bg-red-500 transition-colors shadow-lg shadow-red-600/30"
+              >
+                Yes, Reset Password
               </button>
             </div>
           </div>
