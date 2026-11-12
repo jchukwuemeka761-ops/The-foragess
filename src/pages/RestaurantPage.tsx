@@ -3,10 +3,13 @@ import {
   NAVEDA_PHOTOS,
   NAVEDA_SITE,
   MenuItem,
-  SubheadingPhoto
+  SubheadingPhoto,
+  NAVEDA_MEAL_TIMES,
+  MealTimeTab
 } from '../data/navedaData';
 import { useNavedaData } from '../context/DataContext';
 import { SubheadingBanner } from '../components/SubheadingBanner';
+import { ArabianTeaShowcase } from '../components/ArabianTeaShowcase';
 import {
   Search,
   Sparkles,
@@ -14,12 +17,17 @@ import {
   MessageCircle,
   Clock,
   CheckCircle2,
-  Filter
+  Filter,
+  Maximize2,
+  Sun,
+  Utensils,
+  Moon,
+  Coffee
 } from 'lucide-react';
 
 interface RestaurantPageProps {
   atmosphereClass: string;
-  onInspectPhoto: (photo: SubheadingPhoto) => void;
+  onInspectPhoto: (item: any) => void;
 }
 
 export const RestaurantPage: React.FC<RestaurantPageProps> = ({
@@ -27,12 +35,13 @@ export const RestaurantPage: React.FC<RestaurantPageProps> = ({
   onInspectPhoto
 }) => {
   const { dishes } = useNavedaData();
+  const [selectedMealTime, setSelectedMealTime] = useState<'all' | 'breakfast' | 'lunch' | 'dinner'>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedSpice, setSelectedSpice] = useState<string>('all');
 
   const categories = [
-    { id: 'all', label: `All Dishes (${dishes.length})` },
+    { id: 'all', label: `All Categories (${dishes.length})` },
     { id: 'native', label: 'Eastern Native Soups & Delicacies' },
     { id: 'mains', label: 'Pan-African Mains & Jollof' },
     { id: 'starters', label: 'Starters & Native Pepper Soups' },
@@ -40,8 +49,71 @@ export const RestaurantPage: React.FC<RestaurantPageProps> = ({
     { id: 'tango', label: 'Tango for Two (Sharing Boards)' }
   ];
 
+  // Helper to determine meal time classification for any dish
+  const isDishInMealTime = (dish: MenuItem, meal: 'breakfast' | 'lunch' | 'dinner') => {
+    if (dish.mealTime === meal || dish.mealTime === 'all-day') return true;
+    const name = dish.name.toLowerCase();
+    const id = dish.id.toLowerCase();
+    const desc = dish.description.toLowerCase();
+
+    if (meal === 'breakfast') {
+      return (
+        name.includes('sunrise') ||
+        name.includes('pottage') ||
+        name.includes('asaro') ||
+        name.includes('beans') ||
+        name.includes('ugba') ||
+        name.includes('egg') ||
+        name.includes('plantain') ||
+        name.includes('pepper soup') ||
+        name.includes('wings') ||
+        id.includes('yam') ||
+        id.includes('honey') ||
+        id.includes('farmhouse')
+      );
+    }
+    if (meal === 'lunch') {
+      return (
+        name.includes('jollof') ||
+        name.includes('fried rice') ||
+        name.includes('curry') ||
+        name.includes('chicken') ||
+        name.includes('prawn') ||
+        name.includes('fries') ||
+        name.includes('basket') ||
+        name.includes('snails') ||
+        name.includes('oxtail') ||
+        name.includes('stewed') ||
+        name.includes('medley') ||
+        name.includes('feast') ||
+        name.includes('peanut')
+      );
+    }
+    if (meal === 'dinner') {
+      return (
+        name.includes('soup') ||
+        name.includes('nkwobi') ||
+        name.includes('oha') ||
+        name.includes('egusi') ||
+        name.includes('banga') ||
+        name.includes('ogbono') ||
+        name.includes('okro') ||
+        name.includes('bitter leaf') ||
+        name.includes('afang') ||
+        name.includes('edikang') ||
+        name.includes('symphony') ||
+        name.includes('efo riro') ||
+        name.includes('otong') ||
+        name.includes('seafood')
+      );
+    }
+    return true;
+  };
+
   const filteredDishes = useMemo(() => {
     return dishes.filter((dish) => {
+      const matchesMealTime =
+        selectedMealTime === 'all' || isDishInMealTime(dish, selectedMealTime);
       const matchesCategory = selectedCategory === 'all' || dish.category === selectedCategory;
       const matchesSearch =
         dish.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -49,9 +121,9 @@ export const RestaurantPage: React.FC<RestaurantPageProps> = ({
         dish.ingredients.some((ing) => ing.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesSpice = selectedSpice === 'all' || dish.spicyLevel === selectedSpice;
 
-      return matchesCategory && matchesSearch && matchesSpice;
+      return matchesMealTime && matchesCategory && matchesSearch && matchesSpice;
     });
-  }, [dishes, selectedCategory, searchQuery, selectedSpice]);
+  }, [dishes, selectedMealTime, selectedCategory, searchQuery, selectedSpice]);
 
   const handleOrderWhatsapp = (dish: MenuItem) => {
     const text = encodeURIComponent(
@@ -105,15 +177,108 @@ export const RestaurantPage: React.FC<RestaurantPageProps> = ({
           </div>
         </div>
 
+        {/* Meal Time Selection Bar (Breakfast, Lunch, Dinner, All Menus) */}
+        <div className="mt-8 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400">
+                Service Schedule & Dining Hours
+              </span>
+              <h2 className="text-xl font-black text-white sm:text-2xl">
+                Choose By Meal Time
+              </h2>
+            </div>
+            <a
+              href="#arabian-tea"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3.5 py-1.5 text-xs font-bold text-amber-300 hover:bg-amber-500/20 transition-all"
+            >
+              <Coffee className="h-3.5 w-3.5 text-amber-400" />
+              Arabian Tea Ceremony ☕
+            </a>
+          </div>
+
+          {/* Meal Time Cards / Tabs */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {NAVEDA_MEAL_TIMES.map((meal) => {
+              const isActive = selectedMealTime === meal.id;
+              const count = dishes.filter((d) => meal.id === 'all' || isDishInMealTime(d, meal.id as any)).length;
+              return (
+                <button
+                  key={meal.id}
+                  type="button"
+                  onClick={() => setSelectedMealTime(meal.id)}
+                  className={`relative flex flex-col items-start p-4 rounded-2xl text-left border transition-all duration-300 ${
+                    isActive
+                      ? 'border-amber-400 bg-gradient-to-br from-amber-500/20 via-neutral-900 to-neutral-950 shadow-xl shadow-amber-500/10 ring-2 ring-amber-400/40'
+                      : 'border-white/10 bg-neutral-900/70 hover:border-white/20 hover:bg-neutral-850'
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                      <div className={`p-2 rounded-xl ${
+                        meal.id === 'breakfast'
+                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                          : meal.id === 'lunch'
+                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                          : meal.id === 'dinner'
+                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                          : 'bg-neutral-800 text-neutral-200 border border-neutral-700'
+                      }`}>
+                        {meal.id === 'breakfast' && <Sun className="h-4 w-4" />}
+                        {meal.id === 'lunch' && <Utensils className="h-4 w-4" />}
+                        {meal.id === 'dinner' && <Moon className="h-4 w-4" />}
+                        {meal.id === 'all' && <Sparkles className="h-4 w-4" />}
+                      </div>
+                      <span className={`text-sm font-bold ${isActive ? 'text-amber-300' : 'text-white'}`}>
+                        {meal.label}
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700">
+                      {count} items
+                    </span>
+                  </div>
+
+                  <span className="mt-2 text-[11px] font-medium text-amber-400/90 flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {meal.timeRange}
+                  </span>
+                  <p className="mt-1 text-[11px] text-neutral-400 line-clamp-2 leading-relaxed">
+                    {meal.subtitle}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Filter & Search Bar */}
         <div className="mt-8 space-y-4 rounded-2xl border border-white/10 bg-neutral-900/80 p-5 backdrop-blur-md">
+          {/* Active Meal Banner if not all */}
+          {selectedMealTime !== 'all' && (
+            <div className="flex items-center justify-between p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-amber-400" />
+                <span className="text-neutral-200">
+                  Viewing <strong className="text-amber-300 font-bold capitalize">{selectedMealTime} Menu</strong> ({NAVEDA_MEAL_TIMES.find(m => m.id === selectedMealTime)?.timeRange})
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedMealTime('all')}
+                className="text-amber-400 underline font-bold hover:text-amber-300"
+              >
+                View All Dishes (38)
+              </button>
+            </div>
+          )}
+
           {/* Search input */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
               <input
                 type="text"
-                placeholder="Search 38 dishes by name, ingredients (e.g. Catfish, Oha, Snail, Jollof, Prawns)..."
+                placeholder="Search dishes by name, ingredients (e.g. Catfish, Oha, Snail, Jollof, Prawns)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full rounded-xl border border-neutral-700 bg-neutral-950 pl-10 pr-4 py-2.5 text-sm text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none"
@@ -185,26 +350,44 @@ export const RestaurantPage: React.FC<RestaurantPageProps> = ({
               key={dish.id}
               className="group relative flex flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-950 shadow-xl transition-all duration-300 hover:border-amber-500/50 hover:shadow-2xl hover:shadow-amber-500/10"
             >
-              {/* Dish Photo */}
-              <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-900">
+              {/* Dish Photo with Click-to-Inspect 4K View */}
+              <div
+                onClick={() => onInspectPhoto(dish)}
+                className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-900 cursor-pointer"
+                title="Click to view 4K Ultra HD high-definition photo"
+              >
                 <img
                   src={dish.image}
                   alt={dish.name}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 hd-ai-clarity"
                   loading="lazy"
                 />
+                
+                {/* 4K Zoom Overlay on Hover */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                  <span className="flex items-center gap-1.5 rounded-full bg-neutral-900/90 border border-amber-400/60 px-3 py-1.5 text-xs font-bold text-amber-300 shadow-xl">
+                    <Maximize2 className="h-3.5 w-3.5" />
+                    Inspect 4K View
+                  </span>
+                </div>
+
                 {dish.badge && (
-                  <span className="absolute top-2.5 left-2.5 rounded-lg bg-black/80 px-2.5 py-1 text-[11px] font-bold text-amber-400 backdrop-blur-md border border-amber-500/30">
+                  <span className="absolute top-2.5 left-2.5 rounded-lg bg-black/85 px-2.5 py-1 text-[11px] font-bold text-amber-400 backdrop-blur-md border border-amber-500/30">
                     {dish.badge}
                   </span>
                 )}
                 {dish.spicyLevel && (
-                  <span className="absolute top-2.5 right-2.5 rounded-lg bg-red-950/80 px-2 py-0.5 text-[10px] font-bold text-red-300 border border-red-500/30">
+                  <span className="absolute top-2.5 right-2.5 rounded-lg bg-red-950/85 px-2 py-0.5 text-[10px] font-bold text-red-300 border border-red-500/30">
                     🌶️ {dish.spicyLevel}
                   </span>
                 )}
-                <div className="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-[10px] font-medium text-neutral-300 backdrop-blur-md">
-                  ⏱️ {dish.prepTime}
+                <div className="absolute bottom-2 left-2 flex items-center gap-1.5">
+                  <span className="rounded bg-black/80 px-2 py-0.5 text-[10px] font-medium text-neutral-300 backdrop-blur-md">
+                    ⏱️ {dish.prepTime}
+                  </span>
+                  <span className="rounded bg-emerald-950/80 px-1.5 py-0.5 text-[9px] font-bold text-emerald-300 backdrop-blur-md border border-emerald-500/30">
+                    4K Ultra HD
+                  </span>
                 </div>
               </div>
 
@@ -279,6 +462,14 @@ export const RestaurantPage: React.FC<RestaurantPageProps> = ({
             </button>
           </div>
         )}
+
+        {/* Dedicated Space: Authentic Arabian Tea Ceremony & Equipment Showcase */}
+        <div id="arabian-tea" className="mt-16">
+          <ArabianTeaShowcase
+            atmosphereClass={atmosphereClass}
+            onInspectPhoto={onInspectPhoto}
+          />
+        </div>
       </div>
     </div>
   );

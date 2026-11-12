@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   NAVEDA_PHOTOS,
+  NAVEDA_PITCH_PACKAGES,
   NAVEDA_BILLIARDS_DETAILS,
   NAVEDA_SITE,
   SubheadingPhoto
@@ -66,7 +67,7 @@ export const SportsPage: React.FC<SportsPageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {NAVEDA_PITCH_PACKAGES.map((pkg) => (
+          {(pitchPackages && pitchPackages.length > 0 ? pitchPackages : NAVEDA_PITCH_PACKAGES).map((pkg) => (
             <div
               key={pkg.id}
               className="relative flex flex-col justify-between rounded-3xl border border-neutral-800 bg-neutral-900/90 p-6 sm:p-8 backdrop-blur-xl transition-all hover:border-emerald-500/50 hover:shadow-2xl hover:shadow-emerald-500/10"

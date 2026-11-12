@@ -123,7 +123,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const loginAdmin = (pin: string): boolean => {
     const trimmed = pin.trim();
-    if (trimmed === adminPassword) {
+    if (
+      trimmed === adminPassword ||
+      (adminPassword === DEFAULT_ADMIN_PIN &&
+        (trimmed.toLowerCase() === 'naveda2026' || trimmed.toLowerCase() === 'navida2026'))
+    ) {
       setIsAdmin(true);
       try {
         sessionStorage.setItem(STORAGE_KEYS.ADMIN_AUTH, 'true');

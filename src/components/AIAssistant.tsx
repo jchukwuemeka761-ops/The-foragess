@@ -67,6 +67,42 @@ export const AIAssistant: React.FC = () => {
   const generateFallbackAnswer = (query: string): { text: string; actionUrl?: string; actionText?: string } => {
     const q = query.toLowerCase();
 
+    // Arabian Tea & Hot Brews
+    if (q.includes('arabian') || q.includes('tea') || q.includes('dallah') || q.includes('istikana') || q.includes('karak') || q.includes('brew')) {
+      return {
+        text: `🫖 Authentic Arabian Tea Service at Naveda World Bites & Brews:\n• Royal Cardamom & Saffron Infusion (₦6,500)\n• Maghrebi Fresh Spearmint Gunpowder Tea (₦6,000)\n• Bedouin Spiced Cinnamon & Clove Infusion (₦5,500)\n• Adeni Spiced Karak Chai with Evaporated Milk (₦4,800)\n\nServed in traditional hand-engraved long-spout brass Dallah kettles with gold-filigree Istikana glasses on an ornate brass tray. Available 24 hours daily!`,
+        actionUrl: `https://wa.me/${NAVEDA_SITE.whatsappRaw}?text=${encodeURIComponent('Hello Naveda World, I would like to order the authentic Arabian Tea Ceremony service.')}`,
+        actionText: 'Order Arabian Tea on WhatsApp'
+      };
+    }
+
+    // Breakfast Menu
+    if (q.includes('breakfast') || q.includes('morning') || q.includes('asaro') || q.includes('sunrise')) {
+      return {
+        text: `🌅 Naveda Breakfast Menu (6:00 AM – 11:30 AM & All-Day):\n• Sunrise Sharing Platters with Eggs, Sausages & Sweet Yam\n• Golden Sweet Fried Plantains with Garden Egg / Pepper Sauce\n• Native Yam Pottage (Asaro) with Smoked Fish & Spinach\n• Slow-Cooked Honey Beans (Ewa Aganyin) with Dodo\n• Early Morning Catfish & Goat Meat Pepper Soup\n\nFreshly prepared from 6:00 AM every single morning!`,
+        actionUrl: `https://wa.me/${NAVEDA_SITE.whatsappRaw}?text=${encodeURIComponent('Hello Naveda World kitchen, I would like to order from the Breakfast Menu.')}`,
+        actionText: 'Order Breakfast on WhatsApp'
+      };
+    }
+
+    // Lunch Menu
+    if (q.includes('lunch') || q.includes('afternoon') || q.includes('jollof') || q.includes('fried rice')) {
+      return {
+        text: `☀️ Naveda Lunch Menu (11:30 AM – 4:30 PM):\n• Signature Firewood Smoky Jollof with Jumbo Prawns & Dodo\n• Golden Pan-Fried Rice with Whole Croaker Fish\n• Savory Peanut Groundnut Chicken & Fragrant Rice\n• Crispy Calamari & Tiger Prawns Ocean Basket\n• Peppered Snail & Gizzard Lunch Medley\n\nFast table service and quick delivery across Umuahia!`,
+        actionUrl: `https://wa.me/${NAVEDA_SITE.whatsappRaw}?text=${encodeURIComponent('Hello Naveda World kitchen, I would like to order from the Lunch Menu.')}`,
+        actionText: 'Order Lunch on WhatsApp'
+      };
+    }
+
+    // Dinner & Late-Night Menu
+    if (q.includes('dinner') || q.includes('night') || q.includes('late') || q.includes('clay pot') || q.includes('swallow')) {
+      return {
+        text: `🌙 Naveda Dinner & Late-Night Menu (4:30 PM – Dawn 24/7):\n• Traditional Native Clay-Pot Soups: Ofe Oha, Rich Egusi, Delta Banga, Royal Ogbono, Bitter Leaf, and Seafood Okro\n• Choice of Fresh Swallow: Pounded Yam, Garri, Semovita, Wheat, Oat\n• Authentic Eastern Nkwobi slow-cooked with Utazi & Calabash Nutmeg in wooden mortar\n• Hot Pepper Soup & Oxtail Stews round the clock!`,
+        actionUrl: `https://wa.me/${NAVEDA_SITE.whatsappRaw}?text=${encodeURIComponent('Hello Naveda World kitchen, I would like to order dinner and native swallow.')}`,
+        actionText: 'Order Dinner on WhatsApp'
+      };
+    }
+
     if (q.includes('pitch') || q.includes('turf') || q.includes('football') || q.includes('soccer') || q.includes('5-a-side')) {
       const dayPkg = pitchPackages.find((p) => p.id.includes('day')) || pitchPackages[0];
       const nightPkg = pitchPackages.find((p) => p.id.includes('night')) || pitchPackages[1];
@@ -206,11 +242,12 @@ export const AIAssistant: React.FC = () => {
   };
 
   const quickPrompts = [
+    'Quality Arabian Tea & equipment?',
+    'Breakfast, Lunch & Dinner menus?',
     'Recommend top native soups',
     'How much is the turf pitch?',
     'Live highlife band schedule?',
-    'What drinks & champagne do you have?',
-    'Are you open 24 hours right now?'
+    'What drinks & champagne do you have?'
   ];
 
   return (

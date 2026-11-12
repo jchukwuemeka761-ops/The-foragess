@@ -92,7 +92,47 @@ export interface MenuItem {
   spicyLevel?: 'Mild' | 'Medium' | 'Hot' | 'Extra Hot';
   badge?: string;
   ingredients: string[];
+  mealTime?: 'breakfast' | 'lunch' | 'dinner' | 'all-day';
 }
+
+export interface MealTimeTab {
+  id: 'all' | 'breakfast' | 'lunch' | 'dinner';
+  label: string;
+  timeRange: string;
+  subtitle: string;
+  accent: string;
+}
+
+export const NAVEDA_MEAL_TIMES: MealTimeTab[] = [
+  {
+    id: 'all',
+    label: 'All Menus (38 Dishes)',
+    timeRange: 'Open 24 Hours Daily',
+    subtitle: 'Full culinary repertoire available round the clock',
+    accent: 'amber'
+  },
+  {
+    id: 'breakfast',
+    label: 'Breakfast Menu',
+    timeRange: '6:00 AM – 11:30 AM & All-Day',
+    subtitle: 'Sunrise sharing platters, morning plantains, egg sauce, native pottage, honey beans & warm wake-up broths',
+    accent: 'orange'
+  },
+  {
+    id: 'lunch',
+    label: 'Lunch Menu',
+    timeRange: '11:30 AM – 4:30 PM',
+    subtitle: 'Smoky firewood jollof, fried rice & prawns, savory chicken platters, executive lunches & seafood baskets',
+    accent: 'emerald'
+  },
+  {
+    id: 'dinner',
+    label: 'Dinner & Late-Night Menu',
+    timeRange: '4:30 PM – Dawn (24/7 Dining)',
+    subtitle: 'Rich native clay-pot soups with pounded yam swallow, spicy nkwobi, stewed catfish, oxtail & evening feasts',
+    accent: 'purple'
+  }
+];
 
 export const NAVEDA_SITE = {
   name: 'Naveda World Bites And Brews',
@@ -689,7 +729,7 @@ export const NAVEDA_MENU_ITEMS: MenuItem[] = [
 export interface DrinkItem {
   id: string;
   name: string;
-  category: 'Champagne' | 'Cognac' | 'Tequila' | 'Whiskey' | 'Beer' | 'Cocktails' | 'Wine' | 'Non-Alcoholic';
+  category: 'Champagne' | 'Cognac' | 'Tequila' | 'Whiskey' | 'Beer' | 'Cocktails' | 'Wine' | 'Non-Alcoholic' | 'Arabian Tea & Infusions';
   price: string;
   badge?: string;
   description: string;
@@ -760,10 +800,82 @@ export const INITIAL_DRINKS: DrinkItem[] = [
     price: '₦12,500',
     badge: 'Rich & Bold',
     description: 'Deep roasted barley flavor, dark creamy head, and classic robust character popular with native dishes.'
+  },
+  {
+    id: 'royal-arabian-tea-ceremony',
+    name: 'Royal Arabian Tea Pot Service (Mint, Saffron & Cardamom)',
+    category: 'Arabian Tea & Infusions',
+    price: '₦5,000',
+    badge: 'Artisanal Brew',
+    description: 'Authentic Middle Eastern tea brewed in traditional ornate brass & silver teapots, poured into gold-filigree Istikana glasses with mint, cardamom, cinnamon and sweet dates.'
   }
 ];
 
 export const NAVEDA_VIP_BOTTLES = INITIAL_DRINKS;
+
+export interface ArabianTeaVariety {
+  name: string;
+  price: string;
+  description: string;
+  badge?: string;
+}
+
+export const NAVEDA_ARABIAN_TEA = {
+  id: 'arabian-tea-service',
+  title: 'Royal Arabian Tea Ceremony at Naveda World Bites and Brews',
+  subtitle: 'Authentic Middle Eastern tea brewed in traditional ornate brass & silver teapots, poured from height into gold-filigree Istikana glasses, infused with organic mint, whole cardamom pods, cloves, and cinnamon sticks, served with sweet dates.',
+  imageSrc: '/images/tea/arabian_tea_equipment.jpg',
+  badge: 'Exclusive Beverage Experience',
+  location: 'VIP Tea Lounge & Alfresco Garden Terrace · Naveda Complex',
+  hours: 'Served 24 Hours Round-the-Clock Daily',
+  highlights: [
+    'Hand-engraved silver & brass Dallah teapot service',
+    'Gold-rimmed filigree Istikana tea glasses with aromatic steam',
+    'Simmered with fresh organic mint, cardamom, saffron & cloves',
+    'Solid embossed brass trays with sweet Arabian dates & cinnamon',
+    'Available 24/7 across Restaurant, VIP Lounge & Outdoor Terrace'
+  ],
+  equipmentDetails: [
+    {
+      title: 'Ornate Engraved Dallah Teapot',
+      description: 'Handcrafted silver & brass teapot with long curved pouring spout for high aeration.'
+    },
+    {
+      title: 'Gold-Filigree Istikana Glasses',
+      description: 'Traditional Turkish & Middle Eastern glass teacups with 24k gold filigree patterns.'
+    },
+    {
+      title: 'Embossed Brass Serving Tray',
+      description: 'Heavy engraved brass tray carrying whole cinnamon sticks, cardamom pods, and dates.'
+    }
+  ],
+  varieties: [
+    {
+      name: 'Royal Cardamom & Saffron Infusion Pot',
+      price: '₦5,000',
+      badge: 'Chef Signature',
+      description: 'Aromatic green and black tea simmered with whole green cardamom pods, pure saffron threads, and wild cloves.'
+    },
+    {
+      name: 'Maghrebi Fresh Spearmint Pot (Shai bil Na’na)',
+      price: '₦4,500',
+      badge: 'Classic Moroccan',
+      description: 'Traditional sweet mint tea with fresh crushed mint leaves poured from height for a delicate herbal froth.'
+    },
+    {
+      name: 'Bedouin Spiced Cinnamon Black Tea',
+      price: '₦4,500',
+      badge: 'Aromatic Warmth',
+      description: 'Robust Ceylon black tea brewed with crushed cinnamon sticks, star anise, and citrus blossom honey.'
+    },
+    {
+      name: 'Adeni Karak Spiced Milk Tea',
+      price: '₦4,000',
+      badge: 'Velvety Chai',
+      description: 'Rich slow-simmered evaporated milk tea infused with cardamom, nutmeg, and ginger, warm and comforting.'
+    }
+  ]
+};
 
 export const NAVEDA_MART_HIGHLIGHTS = [
   {

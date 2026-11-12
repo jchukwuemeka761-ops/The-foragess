@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import {
   NAVEDA_PHOTOS,
   NAVEDA_SITE,
-  SubheadingPhoto
+  SubheadingPhoto,
+  NAVEDA_ARABIAN_TEA,
+  NAVEDA_MEAL_TIMES,
+  MenuItem
 } from '../data/navedaData';
 import { useNavedaData } from '../context/DataContext';
 import { SubheadingBanner } from '../components/SubheadingBanner';
@@ -15,13 +18,19 @@ import {
   MapPin,
   Flame,
   Award,
-  Maximize2
+  Maximize2,
+  Coffee,
+  Sun,
+  Utensils,
+  Moon,
+  MessageCircle,
+  CheckCircle2
 } from 'lucide-react';
 
 interface HomePageProps {
   atmosphereClass: string;
   onNavigate: (page: string) => void;
-  onInspectPhoto: (photo: SubheadingPhoto) => void;
+  onInspectPhoto: (item: any) => void;
   onOpenBooking: () => void;
 }
 
@@ -32,12 +41,44 @@ export const HomePage: React.FC<HomePageProps> = ({
   onOpenBooking
 }) => {
   const { dishes } = useNavedaData();
-  const [activeMenuTab, setActiveMenuTab] = useState<'all' | 'native' | 'mains' | 'seafood'>('all');
+  const [activeMenuTab, setActiveMenuTab] = useState<'all' | 'breakfast' | 'lunch' | 'dinner' | 'native' | 'mains' | 'seafood'>('all');
 
   const heroPhoto = NAVEDA_PHOTOS.buildingExterior;
 
+  const isDishInMeal = (dish: MenuItem, meal: 'breakfast' | 'lunch' | 'dinner') => {
+    if (dish.mealTime === meal || dish.mealTime === 'all-day') return true;
+    const name = dish.name.toLowerCase();
+    const id = dish.id.toLowerCase();
+    if (meal === 'breakfast') {
+      return (
+        name.includes('sunrise') || name.includes('pottage') || name.includes('asaro') ||
+        name.includes('beans') || name.includes('ugba') || name.includes('egg') ||
+        name.includes('plantain') || name.includes('pepper soup') || id.includes('yam')
+      );
+    }
+    if (meal === 'lunch') {
+      return (
+        name.includes('jollof') || name.includes('fried rice') || name.includes('curry') ||
+        name.includes('chicken') || name.includes('prawn') || name.includes('fries') ||
+        name.includes('basket') || name.includes('snails') || name.includes('oxtail')
+      );
+    }
+    if (meal === 'dinner') {
+      return (
+        name.includes('soup') || name.includes('nkwobi') || name.includes('oha') ||
+        name.includes('egusi') || name.includes('banga') || name.includes('ogbono') ||
+        name.includes('okro') || name.includes('bitter leaf') || name.includes('afang') ||
+        name.includes('seafood')
+      );
+    }
+    return true;
+  };
+
   const filteredDishes = dishes.filter((dish) => {
     if (activeMenuTab === 'all') return true;
+    if (activeMenuTab === 'breakfast' || activeMenuTab === 'lunch' || activeMenuTab === 'dinner') {
+      return isDishInMeal(dish, activeMenuTab);
+    }
     return dish.category === activeMenuTab;
   }).slice(0, 8); // Showcase 8 featured items with quick link to all dishes
 
@@ -51,7 +92,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             src={heroPhoto.imageSrc}
             alt={heroPhoto.title}
             className={`h-full w-full object-cover object-center ${atmosphereClass} transition-transform duration-1000 scale-100`}
-            priority="true"
+            loading="eager"
           />
           {/* Subtle balanced overlay to guarantee text legibility while keeping the orange architecture vibrant */}
           <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-neutral-950/30" />
@@ -278,23 +319,60 @@ export const HomePage: React.FC<HomePageProps> = ({
               </p>
             </div>
 
-            {/* Filter Tabs */}
+            {/* Filter Tabs: Meal Times & Categories */}
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => setActiveMenuTab('all')}
-                className={`rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
+                className={`rounded-xl px-3 py-2 text-xs font-bold transition-all flex items-center gap-1.5 ${
                   activeMenuTab === 'all'
                     ? 'bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/20'
                     : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
                 }`}
               >
+                <Sparkles className="h-3 w-3" />
                 All Picks (38)
               </button>
               <button
                 type="button"
+                onClick={() => setActiveMenuTab('breakfast')}
+                className={`rounded-xl px-3 py-2 text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  activeMenuTab === 'breakfast'
+                    ? 'bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/20'
+                    : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+                }`}
+              >
+                <Sun className="h-3.5 w-3.5 text-amber-400" />
+                Breakfast Menu
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveMenuTab('lunch')}
+                className={`rounded-xl px-3 py-2 text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  activeMenuTab === 'lunch'
+                    ? 'bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/20'
+                    : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+                }`}
+              >
+                <Utensils className="h-3.5 w-3.5 text-emerald-400" />
+                Lunch Menu
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveMenuTab('dinner')}
+                className={`rounded-xl px-3 py-2 text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  activeMenuTab === 'dinner'
+                    ? 'bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/20'
+                    : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+                }`}
+              >
+                <Moon className="h-3.5 w-3.5 text-purple-400" />
+                Dinner & Late-Night
+              </button>
+              <button
+                type="button"
                 onClick={() => setActiveMenuTab('native')}
-                className={`rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
+                className={`rounded-xl px-3 py-2 text-xs font-bold transition-all ${
                   activeMenuTab === 'native'
                     ? 'bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/20'
                     : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
@@ -305,24 +383,13 @@ export const HomePage: React.FC<HomePageProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveMenuTab('mains')}
-                className={`rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
+                className={`rounded-xl px-3 py-2 text-xs font-bold transition-all ${
                   activeMenuTab === 'mains'
                     ? 'bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/20'
                     : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
                 }`}
               >
                 Jollof & Mains
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveMenuTab('seafood')}
-                className={`rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
-                  activeMenuTab === 'seafood'
-                    ? 'bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/20'
-                    : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-                }`}
-              >
-                Ocean Seafood
               </button>
             </div>
           </div>
@@ -334,24 +401,42 @@ export const HomePage: React.FC<HomePageProps> = ({
                 key={dish.id}
                 className="group relative flex flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-950 shadow-lg transition-all duration-300 hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/10"
               >
-                {/* Dish Photo */}
-                <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-900">
+                {/* Dish Photo with Click-to-Inspect 4K View */}
+                <div
+                  onClick={() => onInspectPhoto(dish)}
+                  className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-900 cursor-pointer"
+                  title="Click to view 4K Ultra HD photo"
+                >
                   <img
                     src={dish.image}
                     alt={dish.name}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 hd-ai-clarity"
                     loading="lazy"
                   />
+
+                  {/* 4K Zoom Overlay on Hover */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                    <span className="flex items-center gap-1.5 rounded-full bg-neutral-900/90 border border-amber-400/60 px-3 py-1.5 text-xs font-bold text-amber-300 shadow-xl">
+                      <Maximize2 className="h-3.5 w-3.5" />
+                      Inspect 4K View
+                    </span>
+                  </div>
+
                   {dish.badge && (
-                    <span className="absolute top-2.5 left-2.5 rounded-lg bg-black/75 px-2.5 py-1 text-[11px] font-bold text-amber-400 backdrop-blur-md border border-amber-500/30">
+                    <span className="absolute top-2.5 left-2.5 rounded-lg bg-black/85 px-2.5 py-1 text-[11px] font-bold text-amber-400 backdrop-blur-md border border-amber-500/30">
                       {dish.badge}
                     </span>
                   )}
                   {dish.spicyLevel && (
-                    <span className="absolute top-2.5 right-2.5 rounded-lg bg-red-950/80 px-2 py-0.5 text-[10px] font-bold text-red-300 border border-red-500/30">
+                    <span className="absolute top-2.5 right-2.5 rounded-lg bg-red-950/85 px-2 py-0.5 text-[10px] font-bold text-red-300 border border-red-500/30">
                       🌶️ {dish.spicyLevel}
                     </span>
                   )}
+                  <div className="absolute bottom-2 left-2 flex items-center gap-1">
+                    <span className="rounded bg-black/80 px-2 py-0.5 text-[9px] font-bold text-emerald-300 backdrop-blur-md border border-emerald-500/30">
+                      4K Ultra HD
+                    </span>
+                  </div>
                 </div>
 
                 {/* Dish Info */}
@@ -401,6 +486,109 @@ export const HomePage: React.FC<HomePageProps> = ({
               View Full Menu with All 38 Spectacular Dishes
               <ArrowRight className="h-4 w-4" />
             </button>
+          </div>
+        </div>
+      </section>
+
+      {/* DEDICATED SPACE: Authentic Arabian Tea Ceremony & Equipment Feature */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="relative overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-neutral-900 via-neutral-950 to-neutral-900 p-6 sm:p-10 shadow-2xl">
+          {/* Subtle decorative glow */}
+          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Column: Authentic Equipment Image with 4K Inspect */}
+            <div className="lg:col-span-6 relative">
+              <div
+                onClick={() => onInspectPhoto({
+                  name: NAVEDA_ARABIAN_TEA.title,
+                  image: NAVEDA_ARABIAN_TEA.imageSrc,
+                  categoryTitle: 'Authentic Beverage Equipment',
+                  price: 'From ₦4,800',
+                  description: NAVEDA_ARABIAN_TEA.subtitle,
+                  ingredients: ['Hand-Engraved Brass Dallah', 'Istikana Glasses with Gold Filigree', 'Finjan Cups', 'Fresh Mint & Cardamom Pods', 'Ornate Serving Tray']
+                })}
+                className="group relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-amber-500/40 bg-neutral-950 cursor-pointer shadow-2xl"
+              >
+                <img
+                  src={NAVEDA_ARABIAN_TEA.imageSrc}
+                  alt={NAVEDA_ARABIAN_TEA.title}
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 hd-ai-clarity"
+                />
+
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                  <span className="flex items-center gap-1.5 rounded-full bg-neutral-900/90 border border-amber-400 px-4 py-2 text-xs font-bold text-amber-300 shadow-xl">
+                    <Maximize2 className="h-4 w-4" />
+                    Inspect 4K Equipment Details
+                  </span>
+                </div>
+
+                <div className="absolute top-3 left-3 flex items-center gap-2">
+                  <span className="rounded-lg bg-black/85 px-3 py-1 text-xs font-bold text-amber-400 backdrop-blur-md border border-amber-500/30">
+                    Authentic Brass Service
+                  </span>
+                </div>
+
+                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs backdrop-blur-md bg-black/75 px-3 py-1.5 rounded-xl border border-white/10">
+                  <span className="text-neutral-300 truncate font-medium">
+                    Engraved Dallah · Istikana Glasses
+                  </span>
+                  <span className="text-emerald-400 font-bold shrink-0">
+                    4K Studio Equipment
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Narrative & Order */}
+            <div className="lg:col-span-6 space-y-5">
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-amber-300">
+                  <Coffee className="h-3.5 w-3.5 text-amber-400" />
+                  Exclusive Hot Brews Tradition
+                </div>
+                <h2 className="font-display text-2xl sm:text-4xl font-black text-white leading-tight">
+                  Here at Naveda World, <br />
+                  <span className="text-amber-400">We Serve Quality Arabian Tea</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
+                  Experience the ancient warmth of Arabian hospitality in Umuahia. Our master tea brewers prepare authentic infusions steeped with cardamom pods, saffron threads, and garden-fresh spearmint — served in traditional hand-engraved long-spout Dallah brass kettles into gold-rimmed Istikana glasses.
+                </p>
+              </div>
+
+              {/* Varieties pill preview */}
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                {NAVEDA_ARABIAN_TEA.varieties.slice(0, 2).map((item) => (
+                  <div key={item.name} className="p-3 rounded-xl bg-neutral-900/80 border border-white/5 space-y-1">
+                    <span className="text-xs font-bold text-white block truncate">{item.name}</span>
+                    <span className="text-xs font-black text-amber-400">{item.price}</span>
+                    <p className="text-[10px] text-neutral-400 line-clamp-1">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => onNavigate('restaurant')}
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-3 text-xs font-bold text-neutral-950 hover:from-amber-400 hover:to-orange-400 transition-all hover:scale-105 shadow-lg shadow-amber-500/20"
+                >
+                  <Coffee className="h-4 w-4" />
+                  Explore Full Arabian Tea Menu
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+
+                <a
+                  href={`https://wa.me/${NAVEDA_SITE.whatsappRaw}?text=${encodeURIComponent('Hello Naveda World Bites & Brews, I would like to order the authentic Arabian Tea Ceremony with the traditional Dallah brass kettle and Istikana glasses service.')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-950/60 px-4 py-3 text-xs font-bold text-emerald-300 hover:bg-emerald-600 hover:text-white transition-all"
+                >
+                  <MessageCircle className="h-4 w-4 text-emerald-400" />
+                  Order Tea on WhatsApp
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>

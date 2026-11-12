@@ -4,7 +4,7 @@ import { DataProvider } from './context/DataContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { AtmosphereToolbar } from './components/AtmosphereToolbar';
-import { LightboxModal } from './components/LightboxModal';
+import { LightboxModal, InspectableItem } from './components/LightboxModal';
 import { ReservationModal } from './components/ReservationModal';
 import { AIAssistant } from './components/AIAssistant';
 import { HomePage } from './pages/HomePage';
@@ -20,7 +20,7 @@ import { MessageCircle, ArrowUp } from 'lucide-react';
 export const AppContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<string>('home');
   const [atmosphereClass, setAtmosphereClass] = useState<string>('atmosphere-ultra');
-  const [inspectPhoto, setInspectPhoto] = useState<SubheadingPhoto | null>(null);
+  const [inspectItem, setInspectItem] = useState<InspectableItem | null>(null);
   const [isBookingOpen, setIsBookingOpen] = useState<boolean>(false);
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
 
@@ -80,7 +80,7 @@ export const AppContent: React.FC = () => {
           <HomePage
             atmosphereClass={atmosphereClass}
             onNavigate={handleNavigate}
-            onInspectPhoto={(photo) => setInspectPhoto(photo)}
+            onInspectPhoto={(photo) => setInspectItem(photo)}
             onOpenBooking={() => setIsBookingOpen(true)}
           />
         )}
@@ -88,14 +88,14 @@ export const AppContent: React.FC = () => {
         {currentPage === 'restaurant' && (
           <RestaurantPage
             atmosphereClass={atmosphereClass}
-            onInspectPhoto={(photo) => setInspectPhoto(photo)}
+            onInspectPhoto={(photo) => setInspectItem(photo)}
           />
         )}
 
         {currentPage === 'sports' && (
           <SportsPage
             atmosphereClass={atmosphereClass}
-            onInspectPhoto={(photo) => setInspectPhoto(photo)}
+            onInspectPhoto={(photo) => setInspectItem(photo)}
             onOpenBooking={() => setIsBookingOpen(true)}
           />
         )}
@@ -103,7 +103,7 @@ export const AppContent: React.FC = () => {
         {currentPage === 'nightlife' && (
           <NightlifePage
             atmosphereClass={atmosphereClass}
-            onInspectPhoto={(photo) => setInspectPhoto(photo)}
+            onInspectPhoto={(photo) => setInspectItem(photo)}
             onOpenBooking={() => setIsBookingOpen(true)}
           />
         )}
@@ -111,21 +111,21 @@ export const AppContent: React.FC = () => {
         {currentPage === 'mart' && (
           <MartPage
             atmosphereClass={atmosphereClass}
-            onInspectPhoto={(photo) => setInspectPhoto(photo)}
+            onInspectPhoto={(photo) => setInspectItem(photo)}
           />
         )}
 
         {currentPage === 'about' && (
           <AboutPage
             atmosphereClass={atmosphereClass}
-            onInspectPhoto={(photo) => setInspectPhoto(photo)}
+            onInspectPhoto={(photo) => setInspectItem(photo)}
           />
         )}
 
         {currentPage === 'contact' && (
           <ContactPage
             atmosphereClass={atmosphereClass}
-            onInspectPhoto={(photo) => setInspectPhoto(photo)}
+            onInspectPhoto={(photo) => setInspectItem(photo)}
           />
         )}
 
@@ -140,10 +140,10 @@ export const AppContent: React.FC = () => {
       {/* 24/7 AI Customer Assistant Floating Concierge */}
       <AIAssistant />
 
-      {/* Lightbox Modal for 4K photo inspection */}
+      {/* Lightbox Modal for 4K photo & dish inspection */}
       <LightboxModal
-        photo={inspectPhoto}
-        onClose={() => setInspectPhoto(null)}
+        item={inspectItem}
+        onClose={() => setInspectItem(null)}
         atmosphereClass={atmosphereClass}
       />
 

@@ -49,17 +49,21 @@ export const AtmosphereToolbar: React.FC<AtmosphereToolbarProps> = ({
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/30 to-orange-500/20 text-amber-400 border border-amber-500/30 shadow-inner">
               <Sparkles className="h-5 w-5 animate-pulse" />
             </span>
-            <div>
-              <p className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                Visual Atmosphere Engine
-                <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-300 font-semibold border border-amber-500/30">
-                  Live Filter
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                  Visual Atmosphere Engine
+                  <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-300 font-semibold border border-amber-500/30">
+                    Live Filter
+                  </span>
+                </p>
+                <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300 border border-emerald-500/30">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  4K Ultra HD AI Clarifier: Active
                 </span>
-              </p>
+              </div>
               <p className="text-xs text-neutral-300 font-medium">
-                Choose background radiance & visibility mode across all sections
+                High-definition studio clarity, crisp contrast & vibrant radiance across all 38 dishes & venue backdrops
               </p>
-            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
