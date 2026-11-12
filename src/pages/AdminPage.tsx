@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavedaData } from '../context/DataContext';
-import { MenuItem, DrinkItem, NAVEDA_SITE } from '../data/navedaData';
+import { MenuItem, DrinkItem, NAVEDA_SITE, MEAL_SERVICE_PRESETS, isDishForMeal } from '../data/navedaData';
 import {
   Lock,
   Unlock,
@@ -26,7 +26,11 @@ import {
   Key,
   Eye,
   EyeOff,
-  ShieldAlert
+  ShieldAlert,
+  Sun,
+  Utensils,
+  Moon,
+  Coffee
 } from 'lucide-react';
 
 interface AdminPageProps {
@@ -66,6 +70,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
   // Search & filter
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedMealFilter, setSelectedMealFilter] = useState<'all' | 'breakfast' | 'lunch' | 'dinner' | 'all-day'>('all');
 
   // Inline price editing states
   const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
@@ -78,6 +83,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
     name: '',
     category: 'native' as MenuItem['category'],
     categoryTitle: 'Eastern Nigerian Native Delicacies',
+    mealTime: 'all-day' as 'breakfast' | 'lunch' | 'dinner' | 'all-day',
     description: '',
     price: '₦15,000',
     portion: 'Native Clay Bowl with Swallow',
@@ -178,30 +184,48 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
   };
 
   // Dish modal actions
-  const openAddDishModal = () => {
+  const openAddDishModal = (targetMeal?: 'breakfast' | 'lunch' | 'dinner' | 'all-day') => {
     setEditingDish(null);
+    const meal = targetMeal || (selectedMealFilter !== 'all' ? selectedMealFilter : 'all-day');
+    const preset = MEAL_SERVICE_PRESETS[meal];
+
+    let sampleImg = '/images/dishes/pss.jpg';
+    if (meal === 'breakfast') sampleImg = '/images/dishes/pss.jpg';
+    else if (meal === 'lunch') sampleImg = '/images/dishes/jfr.jpg';
+    else if (meal === 'dinner') sampleImg = '/images/dishes/eos.jpg';
+    else sampleImg = '/images/tea/arabian_tea_equipment.jpg';
+
     setDishForm({
       name: '',
-      category: 'native',
-      categoryTitle: 'Eastern Nigerian Native Delicacies',
+      category: preset.defaultCategory,
+      categoryTitle: preset.defaultCategoryTitle,
+      mealTime: meal,
       description: '',
-      price: '₦15,000',
-      portion: 'Native Clay Bowl with Swallow',
-      prepTime: '20 mins',
-      spicyLevel: 'Medium',
-      badge: 'Chef Special',
-      image: '/images/dishes/pss.jpg',
-      ingredients: 'Catfish, Spices, Habanero, Fresh Herbs'
+      price: meal === 'breakfast' ? '₦9,500' : meal === 'lunch' ? '₦14,000' : '₦15,000',
+      portion: preset.defaultPortion,
+      prepTime: preset.defaultPrepTime,
+      spicyLevel: preset.defaultSpicy,
+      badge: preset.defaultBadge,
+      image: sampleImg,
+      ingredients: ''
     });
     setIsDishModalOpen(true);
   };
 
   const openEditDishModal = (dish: MenuItem) => {
     setEditingDish(dish);
+    let effectiveMeal: 'breakfast' | 'lunch' | 'dinner' | 'all-day' = dish.mealTime || 'all-day';
+    if (!dish.mealTime) {
+      if (isDishForMeal(dish, 'breakfast')) effectiveMeal = 'breakfast';
+      else if (isDishForMeal(dish, 'dinner')) effectiveMeal = 'dinner';
+      else if (isDishForMeal(dish, 'lunch')) effectiveMeal = 'lunch';
+    }
+
     setDishForm({
       name: dish.name,
       category: dish.category,
       categoryTitle: dish.categoryTitle,
+      mealTime: effectiveMeal,
       description: dish.description,
       price: dish.price,
       portion: dish.portion,
@@ -224,6 +248,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
         name: dishForm.name,
         category: dishForm.category,
         categoryTitle: dishForm.categoryTitle,
+        mealTime: dishForm.mealTime,
         description: dishForm.description,
         price: formattedPrice,
         portion: dishForm.portion,
@@ -233,13 +258,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
         image: dishForm.image,
         ingredients: ingredientsArray
       });
-      showToast(`Updated "${dishForm.name}" price and details.`);
+      showToast(`Updated "${dishForm.name}" in ${dishForm.mealTime.toUpperCase()} menu.`);
     } else {
       const newDish: MenuItem = {
         id: `dish-${Date.now()}`,
         name: dishForm.name,
         category: dishForm.category,
         categoryTitle: dishForm.categoryTitle,
+        mealTime: dishForm.mealTime,
         description: dishForm.description,
         price: formattedPrice,
         portion: dishForm.portion,
@@ -250,9 +276,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
         ingredients: ingredientsArray
       };
       addDish(newDish);
-      showToast(`Added new dish "${dishForm.name}" successfully.`);
+      showToast(`Added new dish to ${dishForm.mealTime.toUpperCase()} Menu successfully!`);
     }
     setIsDishModalOpen(false);
+  };
+
+  const handleQuickChangeMealTime = (dishId: string, newMeal: 'breakfast' | 'lunch' | 'dinner' | 'all-day') => {
+    updateDish(dishId, { mealTime: newMeal });
+    showToast(`Dish reclassified to ${newMeal.toUpperCase()} menu.`);
   };
 
   // Drink modal actions
@@ -326,13 +357,26 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
     setEditingPriceId(null);
   };
 
+  // Meal counts for Admin Tabs
+  const breakfastCount = dishes.filter((d) => isDishForMeal(d, 'breakfast')).length;
+  const lunchCount = dishes.filter((d) => isDishForMeal(d, 'lunch')).length;
+  const dinnerCount = dishes.filter((d) => isDishForMeal(d, 'dinner')).length;
+  const allDayCount = dishes.filter((d) => d.mealTime === 'all-day').length;
+
   // Filtered dishes for admin table
   const filteredDishes = dishes.filter((dish) => {
     const matchesCategory = selectedCategory === 'all' || dish.category === selectedCategory;
+    const matchesMeal =
+      selectedMealFilter === 'all'
+        ? true
+        : selectedMealFilter === 'all-day'
+        ? dish.mealTime === 'all-day'
+        : isDishForMeal(dish, selectedMealFilter);
     const matchesSearch =
       dish.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      dish.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+      dish.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      dish.ingredients.some((i) => i.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesCategory && matchesMeal && matchesSearch;
   });
 
   // ==========================================
@@ -540,14 +584,195 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
       {/* ========================================================= */}
       {activeTab === 'dishes' && (
         <div className="space-y-6">
-          {/* Action Bar */}
+          {/* Direct Meal-Time Creator Hub */}
+          <div className="rounded-3xl border border-amber-500/30 bg-gradient-to-br from-neutral-900/90 via-neutral-900/70 to-neutral-950 p-5 sm:p-6 shadow-xl space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 px-3 py-1 text-[11px] font-bold text-amber-400 border border-amber-500/30">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Direct Meal-Time Access
+                </span>
+                <h2 className="font-display text-xl sm:text-2xl font-bold text-white pt-1">
+                  Add Dishes to Breakfast, Lunch & Dinner
+                </h2>
+                <p className="text-xs text-neutral-400">
+                  Direct dedicated workflows with distinct culinary portion presets, timing windows, and automatic live syncing to the customer menus.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => openAddDishModal('all-day')}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-neutral-700 bg-neutral-800/80 px-3.5 py-2 text-xs font-semibold text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors shrink-0"
+              >
+                <Plus className="h-3.5 w-3.5 text-amber-400" />
+                Add All-Day / Custom Dish
+              </button>
+            </div>
+
+            {/* 3 Dedicated Direct Action Cards / Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              {/* 1. Add Breakfast Dish */}
+              <button
+                type="button"
+                onClick={() => openAddDishModal('breakfast')}
+                className="group relative flex flex-col items-start p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 hover:border-amber-400/60 transition-all text-left shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <div className="flex items-center justify-between w-full mb-2">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 text-neutral-950 shadow-md">
+                    <Sun className="h-5 w-5" />
+                  </span>
+                  <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300 border border-amber-500/30">
+                    6:00 AM – 11:30 AM
+                  </span>
+                </div>
+                <span className="font-display font-bold text-sm text-white group-hover:text-amber-400 transition-colors flex items-center gap-1.5">
+                  <Plus className="h-4 w-4 text-amber-400" />
+                  + Add Breakfast Dish
+                </span>
+                <p className="text-[11px] text-neutral-400 pt-1 line-clamp-2">
+                  Morning eggs, ripe plantains, honey beans, sunrise catfish pepper soup & warm wake-up broths.
+                </p>
+              </button>
+
+              {/* 2. Add Lunch Dish */}
+              <button
+                type="button"
+                onClick={() => openAddDishModal('lunch')}
+                className="group relative flex flex-col items-start p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 hover:border-emerald-400/60 transition-all text-left shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <div className="flex items-center justify-between w-full mb-2">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-neutral-950 shadow-md">
+                    <Utensils className="h-5 w-5" />
+                  </span>
+                  <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300 border border-emerald-500/30">
+                    11:30 AM – 4:30 PM
+                  </span>
+                </div>
+                <span className="font-display font-bold text-sm text-white group-hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+                  <Plus className="h-4 w-4 text-emerald-400" />
+                  + Add Lunch Dish
+                </span>
+                <p className="text-[11px] text-neutral-400 pt-1 line-clamp-2">
+                  Smoky firewood jollof, executive fried rice & jumbo prawns, savory chicken & midday plates.
+                </p>
+              </button>
+
+              {/* 3. Add Dinner Dish */}
+              <button
+                type="button"
+                onClick={() => openAddDishModal('dinner')}
+                className="group relative flex flex-col items-start p-4 rounded-2xl border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 hover:border-purple-400/60 transition-all text-left shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <div className="flex items-center justify-between w-full mb-2">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 text-white shadow-md">
+                    <Moon className="h-5 w-5" />
+                  </span>
+                  <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] font-bold text-purple-300 border border-purple-500/30">
+                    4:30 PM – Dawn (24/7)
+                  </span>
+                </div>
+                <span className="font-display font-bold text-sm text-white group-hover:text-purple-400 transition-colors flex items-center gap-1.5">
+                  <Plus className="h-4 w-4 text-purple-400" />
+                  + Add Dinner Dish
+                </span>
+                <p className="text-[11px] text-neutral-400 pt-1 line-clamp-2">
+                  Eastern native clay-pot soups (Oha, Egusi, Banga), swallows, spicy nkwobi & evening grills.
+                </p>
+              </button>
+            </div>
+          </div>
+
+          {/* Meal-Time Navigation Filter Bar */}
+          <div className="flex flex-wrap items-center gap-2 border-b border-neutral-800 pb-3">
+            <button
+              type="button"
+              onClick={() => setSelectedMealFilter('all')}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
+                selectedMealFilter === 'all'
+                  ? 'bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/20'
+                  : 'bg-neutral-900 text-neutral-300 hover:bg-neutral-800 hover:text-white'
+              }`}
+            >
+              <span>🍽️ All Dishes</span>
+              <span className="rounded-full bg-black/25 px-2 py-0.5 text-[10px] font-mono">
+                {dishes.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSelectedMealFilter('breakfast')}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
+                selectedMealFilter === 'breakfast'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-neutral-950 shadow-md shadow-amber-500/20'
+                  : 'bg-neutral-900 text-neutral-300 hover:bg-neutral-800 hover:text-amber-400'
+              }`}
+            >
+              <Sun className="h-3.5 w-3.5" />
+              <span>Breakfast Menu</span>
+              <span className="rounded-full bg-black/25 px-2 py-0.5 text-[10px] font-mono">
+                {breakfastCount}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSelectedMealFilter('lunch')}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
+                selectedMealFilter === 'lunch'
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-neutral-950 shadow-md shadow-emerald-500/20'
+                  : 'bg-neutral-900 text-neutral-300 hover:bg-neutral-800 hover:text-emerald-400'
+              }`}
+            >
+              <Utensils className="h-3.5 w-3.5" />
+              <span>Lunch Menu</span>
+              <span className="rounded-full bg-black/25 px-2 py-0.5 text-[10px] font-mono">
+                {lunchCount}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSelectedMealFilter('dinner')}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
+                selectedMealFilter === 'dinner'
+                  ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-md shadow-purple-500/20'
+                  : 'bg-neutral-900 text-neutral-300 hover:bg-neutral-800 hover:text-purple-400'
+              }`}
+            >
+              <Moon className="h-3.5 w-3.5" />
+              <span>Dinner Menu</span>
+              <span className="rounded-full bg-black/25 px-2 py-0.5 text-[10px] font-mono">
+                {dinnerCount}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSelectedMealFilter('all-day')}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
+                selectedMealFilter === 'all-day'
+                  ? 'bg-neutral-700 text-white shadow-md'
+                  : 'bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-white'
+              }`}
+            >
+              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+              <span>All-Day Specials</span>
+              <span className="rounded-full bg-black/25 px-2 py-0.5 text-[10px] font-mono">
+                {allDayCount}
+              </span>
+            </button>
+          </div>
+
+          {/* Action & Filter Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4">
             <div className="flex flex-1 flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
                 <input
                   type="text"
-                  placeholder="Search dishes to edit price or picture..."
+                  placeholder="Search dishes to edit price, photo, or ingredients..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full rounded-xl border border-neutral-700 bg-neutral-950 pl-10 pr-4 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
@@ -559,7 +784,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
               >
-                <option value="all">All Categories</option>
+                <option value="all">All Culinary Categories</option>
                 <option value="native">Eastern Native Soups</option>
                 <option value="mains">Pan-African Mains & Jollof</option>
                 <option value="starters">Starters & Pepper Soups</option>
@@ -568,14 +793,22 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
               </select>
             </div>
 
-            <button
-              type="button"
-              onClick={openAddDishModal}
-              className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-emerald-600/20 hover:from-emerald-500 hover:to-teal-500 transition-all hover:scale-105 active:scale-95"
-            >
-              <Plus className="h-4 w-4" />
-              Add New Dish with Picture
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => openAddDishModal(selectedMealFilter !== 'all' ? selectedMealFilter : undefined)}
+                className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-emerald-600/20 hover:from-emerald-500 hover:to-teal-500 transition-all hover:scale-105 active:scale-95"
+              >
+                <Plus className="h-4 w-4" />
+                {selectedMealFilter === 'breakfast'
+                  ? 'Add Breakfast Dish'
+                  : selectedMealFilter === 'lunch'
+                  ? 'Add Lunch Dish'
+                  : selectedMealFilter === 'dinner'
+                  ? 'Add Dinner Dish'
+                  : 'Add New Dish with Picture'}
+              </button>
+            </div>
           </div>
 
           {/* Dishes Table / Cards */}
@@ -586,6 +819,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
                   <tr>
                     <th className="py-4 px-4">Photo</th>
                     <th className="py-4 px-4">Dish Name & Category</th>
+                    <th className="py-4 px-4">Meal Service</th>
                     <th className="py-4 px-4">Price (Naira ₦)</th>
                     <th className="py-4 px-4">Portion / Details</th>
                     <th className="py-4 px-4 text-right">Actions</th>
@@ -594,6 +828,16 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
                 <tbody className="divide-y divide-neutral-800/60">
                   {filteredDishes.map((dish) => {
                     const isEditingPrice = editingPriceId === dish.id;
+                    const effectiveMeal: 'breakfast' | 'lunch' | 'dinner' | 'all-day' =
+                      dish.mealTime ||
+                      (isDishForMeal(dish, 'breakfast')
+                        ? 'breakfast'
+                        : isDishForMeal(dish, 'dinner')
+                        ? 'dinner'
+                        : isDishForMeal(dish, 'lunch')
+                        ? 'lunch'
+                        : 'all-day');
+
                     return (
                       <tr key={dish.id} className="hover:bg-neutral-800/40 transition-colors">
                         <td className="py-3 px-4 w-16">
@@ -616,6 +860,48 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
                                 🌶️ {dish.spicyLevel}
                               </span>
                             )}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex flex-col gap-1.5">
+                            <span
+                              className={`inline-flex items-center gap-1 w-fit rounded-lg px-2 py-0.5 text-[10px] font-bold border ${
+                                effectiveMeal === 'breakfast'
+                                  ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                                  : effectiveMeal === 'lunch'
+                                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                                  : effectiveMeal === 'dinner'
+                                  ? 'bg-purple-500/15 text-purple-300 border-purple-500/30'
+                                  : 'bg-neutral-800 text-neutral-300 border-neutral-700'
+                              }`}
+                            >
+                              {effectiveMeal === 'breakfast' && <Sun className="h-3 w-3 text-amber-400" />}
+                              {effectiveMeal === 'lunch' && <Utensils className="h-3 w-3 text-emerald-400" />}
+                              {effectiveMeal === 'dinner' && <Moon className="h-3 w-3 text-purple-400" />}
+                              {effectiveMeal === 'all-day' && <Sparkles className="h-3 w-3 text-amber-400" />}
+                              <span>
+                                {effectiveMeal === 'breakfast'
+                                  ? 'Breakfast'
+                                  : effectiveMeal === 'lunch'
+                                  ? 'Lunch'
+                                  : effectiveMeal === 'dinner'
+                                  ? 'Dinner'
+                                  : 'All-Day'}
+                              </span>
+                            </span>
+
+                            {/* Quick 1-click reclassifier */}
+                            <select
+                              value={effectiveMeal}
+                              onChange={(e) => handleQuickChangeMealTime(dish.id, e.target.value as any)}
+                              className="text-[10px] rounded bg-neutral-950 border border-neutral-800 px-1.5 py-0.5 text-neutral-400 hover:text-white focus:border-amber-500 focus:outline-none"
+                              title="Quick change meal classification"
+                            >
+                              <option value="breakfast">🌅 Breakfast (6:00 AM – 11:30 AM)</option>
+                              <option value="lunch">☀️ Lunch (11:30 AM – 4:30 PM)</option>
+                              <option value="dinner">🌙 Dinner (4:30 PM – Dawn)</option>
+                              <option value="all-day">✨ All-Day Dining (24/7)</option>
+                            </select>
                           </div>
                         </td>
                         <td className="py-3 px-4">
@@ -1169,6 +1455,155 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBackToSite }) => {
             </div>
 
             <form onSubmit={saveDishForm} className="space-y-4 pt-2">
+              {/* Meal-Time & Service Destination Selector */}
+              <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                    Target Meal Service Destination
+                  </label>
+                  <span className="text-[10px] text-neutral-400">
+                    Directly classifies dish into customer menus
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {/* Breakfast */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const p = MEAL_SERVICE_PRESETS.breakfast;
+                      setDishForm((prev) => ({
+                        ...prev,
+                        mealTime: 'breakfast',
+                        category: prev.category === 'native' ? p.defaultCategory : prev.category,
+                        categoryTitle: prev.category === 'native' ? p.defaultCategoryTitle : prev.categoryTitle,
+                        badge: prev.badge || p.defaultBadge,
+                        portion: prev.portion === 'Native Clay Bowl with Swallow' ? p.defaultPortion : prev.portion,
+                        spicyLevel: prev.spicyLevel || p.defaultSpicy
+                      }));
+                    }}
+                    className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${
+                      dishForm.mealTime === 'breakfast'
+                        ? 'border-amber-500 bg-amber-500/20 text-amber-300 ring-2 ring-amber-500/30 font-bold'
+                        : 'border-neutral-800 bg-neutral-900/60 text-neutral-400 hover:text-white hover:border-neutral-700'
+                    }`}
+                  >
+                    <Sun className="h-4 w-4 mb-1 text-amber-400" />
+                    <span className="text-xs">Breakfast</span>
+                    <span className="text-[9px] opacity-75">6:00 AM – 11:30 AM</span>
+                  </button>
+
+                  {/* Lunch */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const p = MEAL_SERVICE_PRESETS.lunch;
+                      setDishForm((prev) => ({
+                        ...prev,
+                        mealTime: 'lunch',
+                        category: prev.category === 'native' ? p.defaultCategory : prev.category,
+                        categoryTitle: prev.category === 'native' ? p.defaultCategoryTitle : prev.categoryTitle,
+                        badge: prev.badge || p.defaultBadge,
+                        portion: prev.portion === 'Native Clay Bowl with Swallow' ? p.defaultPortion : prev.portion,
+                        spicyLevel: prev.spicyLevel || p.defaultSpicy
+                      }));
+                    }}
+                    className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${
+                      dishForm.mealTime === 'lunch'
+                        ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300 ring-2 ring-emerald-500/30 font-bold'
+                        : 'border-neutral-800 bg-neutral-900/60 text-neutral-400 hover:text-white hover:border-neutral-700'
+                    }`}
+                  >
+                    <Utensils className="h-4 w-4 mb-1 text-emerald-400" />
+                    <span className="text-xs">Lunch</span>
+                    <span className="text-[9px] opacity-75">11:30 AM – 4:30 PM</span>
+                  </button>
+
+                  {/* Dinner */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const p = MEAL_SERVICE_PRESETS.dinner;
+                      setDishForm((prev) => ({
+                        ...prev,
+                        mealTime: 'dinner',
+                        category: p.defaultCategory,
+                        categoryTitle: p.defaultCategoryTitle,
+                        badge: prev.badge || p.defaultBadge,
+                        portion: prev.portion || p.defaultPortion,
+                        spicyLevel: prev.spicyLevel || p.defaultSpicy
+                      }));
+                    }}
+                    className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${
+                      dishForm.mealTime === 'dinner'
+                        ? 'border-purple-500 bg-purple-500/20 text-purple-300 ring-2 ring-purple-500/30 font-bold'
+                        : 'border-neutral-800 bg-neutral-900/60 text-neutral-400 hover:text-white hover:border-neutral-700'
+                    }`}
+                  >
+                    <Moon className="h-4 w-4 mb-1 text-purple-400" />
+                    <span className="text-xs">Dinner & Late-Night</span>
+                    <span className="text-[9px] opacity-75">4:30 PM – Dawn</span>
+                  </button>
+
+                  {/* All-Day */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDishForm((prev) => ({
+                        ...prev,
+                        mealTime: 'all-day'
+                      }));
+                    }}
+                    className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${
+                      dishForm.mealTime === 'all-day'
+                        ? 'border-neutral-500 bg-neutral-800 text-white ring-2 ring-white/20 font-bold'
+                        : 'border-neutral-800 bg-neutral-900/60 text-neutral-400 hover:text-white hover:border-neutral-700'
+                    }`}
+                  >
+                    <Sparkles className="h-4 w-4 mb-1 text-amber-400" />
+                    <span className="text-xs">All-Day Dining</span>
+                    <span className="text-[9px] opacity-75">24 Hours Round</span>
+                  </button>
+                </div>
+
+                {/* Quick-Fill Preset Suggestions */}
+                {MEAL_SERVICE_PRESETS[dishForm.mealTime]?.quickIdeas && (
+                  <div className="pt-2 border-t border-neutral-900 space-y-1.5">
+                    <span className="text-[10px] text-neutral-400 block font-medium">
+                      💡 Click any culinary idea below to auto-populate fields for {dishForm.mealTime.toUpperCase()}:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {MEAL_SERVICE_PRESETS[dishForm.mealTime].quickIdeas.map((idea, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            const p = MEAL_SERVICE_PRESETS[dishForm.mealTime];
+                            setDishForm((prev) => ({
+                              ...prev,
+                              name: idea.name,
+                              description: idea.desc,
+                              price: idea.price,
+                              portion: idea.portion,
+                              ingredients: idea.ingredients,
+                              category: p.defaultCategory,
+                              categoryTitle: p.defaultCategoryTitle,
+                              spicyLevel: p.defaultSpicy,
+                              badge: p.defaultBadge
+                            }));
+                          }}
+                          className="rounded-lg border border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 px-2.5 py-1 text-[11px] text-neutral-300 hover:text-amber-300 transition-colors flex items-center gap-1"
+                        >
+                          <Plus className="h-3 w-3 text-amber-400" />
+                          <span>{idea.name}</span>
+                          <span className="text-amber-400/80 font-mono text-[10px]">({idea.price})</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-semibold text-neutral-300">Dish Name</label>

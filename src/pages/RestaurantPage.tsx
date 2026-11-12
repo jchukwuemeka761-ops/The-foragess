@@ -5,7 +5,8 @@ import {
   MenuItem,
   SubheadingPhoto,
   NAVEDA_MEAL_TIMES,
-  MealTimeTab
+  MealTimeTab,
+  isDishForMeal
 } from '../data/navedaData';
 import { useNavedaData } from '../context/DataContext';
 import { SubheadingBanner } from '../components/SubheadingBanner';
@@ -51,63 +52,7 @@ export const RestaurantPage: React.FC<RestaurantPageProps> = ({
 
   // Helper to determine meal time classification for any dish
   const isDishInMealTime = (dish: MenuItem, meal: 'breakfast' | 'lunch' | 'dinner') => {
-    if (dish.mealTime === meal || dish.mealTime === 'all-day') return true;
-    const name = dish.name.toLowerCase();
-    const id = dish.id.toLowerCase();
-    const desc = dish.description.toLowerCase();
-
-    if (meal === 'breakfast') {
-      return (
-        name.includes('sunrise') ||
-        name.includes('pottage') ||
-        name.includes('asaro') ||
-        name.includes('beans') ||
-        name.includes('ugba') ||
-        name.includes('egg') ||
-        name.includes('plantain') ||
-        name.includes('pepper soup') ||
-        name.includes('wings') ||
-        id.includes('yam') ||
-        id.includes('honey') ||
-        id.includes('farmhouse')
-      );
-    }
-    if (meal === 'lunch') {
-      return (
-        name.includes('jollof') ||
-        name.includes('fried rice') ||
-        name.includes('curry') ||
-        name.includes('chicken') ||
-        name.includes('prawn') ||
-        name.includes('fries') ||
-        name.includes('basket') ||
-        name.includes('snails') ||
-        name.includes('oxtail') ||
-        name.includes('stewed') ||
-        name.includes('medley') ||
-        name.includes('feast') ||
-        name.includes('peanut')
-      );
-    }
-    if (meal === 'dinner') {
-      return (
-        name.includes('soup') ||
-        name.includes('nkwobi') ||
-        name.includes('oha') ||
-        name.includes('egusi') ||
-        name.includes('banga') ||
-        name.includes('ogbono') ||
-        name.includes('okro') ||
-        name.includes('bitter leaf') ||
-        name.includes('afang') ||
-        name.includes('edikang') ||
-        name.includes('symphony') ||
-        name.includes('efo riro') ||
-        name.includes('otong') ||
-        name.includes('seafood')
-      );
-    }
-    return true;
+    return isDishForMeal(dish, meal);
   };
 
   const filteredDishes = useMemo(() => {

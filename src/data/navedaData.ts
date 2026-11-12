@@ -134,6 +134,217 @@ export const NAVEDA_MEAL_TIMES: MealTimeTab[] = [
   }
 ];
 
+export interface MealServicePreset {
+  id: 'breakfast' | 'lunch' | 'dinner' | 'all-day';
+  label: string;
+  timeWindow: string;
+  shortDesc: string;
+  defaultBadge: string;
+  defaultCategory: MenuItem['category'];
+  defaultCategoryTitle: string;
+  defaultPortion: string;
+  defaultPrepTime: string;
+  defaultSpicy: 'Mild' | 'Medium' | 'Hot' | 'Extra Hot';
+  accentColor: string;
+  bgGlow: string;
+  borderColor: string;
+  textColor: string;
+  quickIdeas: { name: string; desc: string; price: string; portion: string; ingredients: string }[];
+}
+
+export const MEAL_SERVICE_PRESETS: Record<'breakfast' | 'lunch' | 'dinner' | 'all-day', MealServicePreset> = {
+  breakfast: {
+    id: 'breakfast',
+    label: 'Breakfast Service',
+    timeWindow: '6:00 AM – 11:30 AM & Morning All-Day',
+    shortDesc: 'Morning energizers, plantains, warm egg sauce, honey beans & wake-up broths',
+    defaultBadge: 'Sunrise Fresh',
+    defaultCategory: 'starters',
+    defaultCategoryTitle: 'Starters & Native Pepper Soups',
+    defaultPortion: 'Morning Platter with Bread / Plantain',
+    defaultPrepTime: '15 mins',
+    defaultSpicy: 'Mild',
+    accentColor: 'from-amber-500 to-orange-500',
+    bgGlow: 'bg-amber-500/10',
+    borderColor: 'border-amber-500/40',
+    textColor: 'text-amber-400',
+    quickIdeas: [
+      {
+        name: 'Golden Fried Plantain & Scrambled Egg Sauce',
+        desc: 'Sweet ripe dodo served with rich, aromatic garden egg and plum tomato sauce with fresh herbs.',
+        price: '₦9,500',
+        portion: 'Breakfast Board with Hot Beverage',
+        ingredients: 'Ripe Plantain, Farm Eggs, Plum Tomatoes, Spring Onions, Peppers'
+      },
+      {
+        name: 'Royal Sunrise Catfish Broth & Warm Crusty Rolls',
+        desc: 'Early morning clear uziza and nutmeg broth served steaming hot with bakery fresh crusty rolls.',
+        price: '₦12,500',
+        portion: 'Deep Morning Soup Bowl',
+        ingredients: 'Fresh Catfish Fillet, Uziza Leaf, Uda Seed, Ehuru, Fresh Rolls'
+      },
+      {
+        name: 'Native Yam & Honey Beans Pottage',
+        desc: 'Slow-simmered Oloyin honey beans and soft white yam cubes infused with crayfish and sweet palm oil.',
+        price: '₦11,000',
+        portion: 'Warm Clay Breakfast Bowl',
+        ingredients: 'White Yam, Oloyin Honey Beans, Pure Palm Oil, Smoked Fish, Crayfish'
+      }
+    ]
+  },
+  lunch: {
+    id: 'lunch',
+    label: 'Lunch Service',
+    timeWindow: '11:30 AM – 4:30 PM',
+    shortDesc: 'Smoky firewood jollof, fried rice & prawns, executive plates & midday entrées',
+    defaultBadge: 'Lunch Favorite',
+    defaultCategory: 'mains',
+    defaultCategoryTitle: 'Pan-African Entrées',
+    defaultPortion: 'Executive Lunch Platter with Crisp Sides',
+    defaultPrepTime: '20 mins',
+    defaultSpicy: 'Medium',
+    accentColor: 'from-emerald-500 to-teal-500',
+    bgGlow: 'bg-emerald-500/10',
+    borderColor: 'border-emerald-500/40',
+    textColor: 'text-emerald-400',
+    quickIdeas: [
+      {
+        name: 'Smoky Firewood Party Jollof & Grilled Herb Chicken',
+        desc: 'Infused with authentic smoky party jollof aroma, paired with quarter grilled chicken and sweet dodo.',
+        price: '₦14,500',
+        portion: 'Executive Lunch Platter',
+        ingredients: 'Long Grain Parboiled Rice, Grilled Chicken, Sweet Plantain, Red Bell Pepper, Thyme'
+      },
+      {
+        name: 'Naveda Special Fried Rice & Garlic Jumbo Prawns',
+        desc: 'Wok-tossed sweet corn, liver, and garden peas fried rice crowned with succulent garlic butter prawns.',
+        price: '₦17,000',
+        portion: 'Large Lunch Platter',
+        ingredients: 'Jumbo Tiger Prawns, Basmati Rice, Sweet Corn, Carrots, Kidney Beans, Garlic'
+      },
+      {
+        name: 'Crispy Calamari & Spiced Golden Fries Basket',
+        desc: 'Tender golden-battered squid rings paired with hand-cut yam fries, coleslaw, and spicy cocktail dip.',
+        price: '₦13,500',
+        portion: 'Midday Express Basket',
+        ingredients: 'Atlantic Calamari, Crispy Potato Fries, Tartar Sauce, Sweet Chili, Cabbage Slaw'
+      }
+    ]
+  },
+  dinner: {
+    id: 'dinner',
+    label: 'Dinner & Late-Night',
+    timeWindow: '4:30 PM – Dawn 24/7 Dining',
+    shortDesc: 'Rich Eastern native soups, clay pots with hot swallow, spicy nkwobi & evening grills',
+    defaultBadge: 'Dinner Special',
+    defaultCategory: 'native',
+    defaultCategoryTitle: 'Eastern Nigerian Native Delicacies',
+    defaultPortion: 'Native Clay Pot with Choice of Swallow',
+    defaultPrepTime: '25 mins',
+    defaultSpicy: 'Hot',
+    accentColor: 'from-purple-500 to-indigo-500',
+    bgGlow: 'bg-purple-500/10',
+    borderColor: 'border-purple-500/40',
+    textColor: 'text-purple-400',
+    quickIdeas: [
+      {
+        name: 'Royal Eastern Oha Soup with Pounded Yam Swallow',
+        desc: 'Velvety oha leaves simmered in cocoyam-thickened stock with dried fish, stockfish ear, and tender beef cuts.',
+        price: '₦15,000',
+        portion: 'Hot Clay Pot with Fluffy Pounded Yam',
+        ingredients: 'Fresh Oha Leaves, Cocoyam Thickener, Stockfish, Dried Fish, Assorted Meats, Pounded Yam'
+      },
+      {
+        name: 'Spicy Nkwobi Cow Foot in Carved Mortar',
+        desc: 'Succulent cuts of cow foot simmered in spicy potash emulsion, ehuru nutmeg, and topped with crisp utazi leaves.',
+        price: '₦13,500',
+        portion: 'Carved Wooden Mortar with Cold Drink Pairing',
+        ingredients: 'Cow Foot, Potash Emulsion, Ehuru, Utazi Leaves, Red Onion, Native Chili'
+      },
+      {
+        name: 'Rich Seafood Okra Soup & Yellow Garri',
+        desc: 'Finely sliced crunchy okra loaded with blue crab, tiger prawns, periwinkles, and fresh Atlantic fish.',
+        price: '₦18,500',
+        portion: 'Ocean Seafood Feast Pot',
+        ingredients: 'Fresh Okra, Tiger Prawns, Blue Crab, Snails, Fish Fillet, Crayfish, Yellow Garri'
+      }
+    ]
+  },
+  'all-day': {
+    id: 'all-day',
+    label: 'All-Day Dining',
+    timeWindow: 'Available 24 Hours Round the Clock',
+    shortDesc: 'Sharing platters, Arabian tea ceremonies, barbecue grills & signature bites',
+    defaultBadge: '24/7 Signature',
+    defaultCategory: 'tango',
+    defaultCategoryTitle: 'Tango for Two (Sharing Platters)',
+    defaultPortion: 'Grand Sharing Table Board (2-3 Guests)',
+    defaultPrepTime: '20 mins',
+    defaultSpicy: 'Medium',
+    accentColor: 'from-neutral-600 to-neutral-700',
+    bgGlow: 'bg-neutral-800/40',
+    borderColor: 'border-neutral-700',
+    textColor: 'text-neutral-300',
+    quickIdeas: [
+      {
+        name: 'Royal Arabian Tea Ceremony Pot & Medina Dates',
+        desc: 'Traditional engraved brass teapot infused with fresh mint leaves, green cardamom pods, and Iranian saffron.',
+        price: '₦8,500',
+        portion: 'Brass Teapot with 4 Gilded Glasses & Dates',
+        ingredients: 'Loose Gunpowder Green Tea, Fresh Mint, Green Cardamom, Saffron, Medina Dates'
+      },
+      {
+        name: 'Tango for Two Jumbo Grill Sharing Board',
+        desc: 'Generous wooden board loaded with glazed BBQ chicken, suya spiced beef kebabs, and peppered snails.',
+        price: '₦26,000',
+        portion: 'Double Platter for 2-3 Guests',
+        ingredients: 'Grilled Chicken, Suya Beef, Snails, Sweet Corn on Cob, Roasted Plantain, Dips'
+      }
+    ]
+  }
+};
+
+export function isDishForMeal(dish: MenuItem, meal: 'breakfast' | 'lunch' | 'dinner'): boolean {
+  if (dish.mealTime) {
+    return dish.mealTime === meal || dish.mealTime === 'all-day';
+  }
+  const name = dish.name.toLowerCase();
+  const id = dish.id.toLowerCase();
+  const desc = dish.description.toLowerCase();
+  const cat = (dish.category || '').toLowerCase();
+
+  if (meal === 'breakfast') {
+    return (
+      name.includes('sunrise') || name.includes('pottage') || name.includes('asaro') ||
+      name.includes('beans') || name.includes('ugba') || name.includes('egg') ||
+      name.includes('plantain') || name.includes('pepper soup') || name.includes('wings') ||
+      name.includes('tea') || name.includes('waffle') || name.includes('toast') ||
+      id.includes('yam') || id.includes('honey') || id.includes('farmhouse') ||
+      id.includes('rolls') || id.includes('tea') || desc.includes('breakfast')
+    );
+  }
+  if (meal === 'lunch') {
+    return (
+      name.includes('jollof') || name.includes('fried rice') || name.includes('curry') ||
+      name.includes('chicken') || name.includes('prawn') || name.includes('fries') ||
+      name.includes('basket') || name.includes('snails') || name.includes('oxtail') ||
+      name.includes('stewed') || name.includes('medley') || name.includes('feast') ||
+      name.includes('peanut') || cat === 'mains' || cat === 'seafood' || desc.includes('lunch')
+    );
+  }
+  if (meal === 'dinner') {
+    return (
+      name.includes('soup') || name.includes('nkwobi') || name.includes('oha') ||
+      name.includes('egusi') || name.includes('banga') || name.includes('ogbono') ||
+      name.includes('okro') || name.includes('bitter leaf') || name.includes('afang') ||
+      name.includes('edikang') || name.includes('symphony') || name.includes('efo riro') ||
+      name.includes('otong') || name.includes('seafood') || cat === 'native' || cat === 'grills' ||
+      desc.includes('dinner')
+    );
+  }
+  return true;
+}
+
 export const NAVEDA_SITE = {
   name: 'Naveda World Bites And Brews',
   shortName: 'Naveda World',
